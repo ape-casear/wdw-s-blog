@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Regist from '@/components/Regist'
 import FirstRouter from '@/components/FirstRouter'
 import UserInfo from '@/components/UserInfo'
+import MarkDown from '@/components/MarkDown'
 
 Vue.use(Router)
 
@@ -26,6 +27,11 @@ export default new Router({
       path: '/userInfo',
       name: 'UserInfo',
       component: UserInfo
+    },
+    {
+      path: '/blog',
+      name: 'Blog',
+      component: MarkDown
     }
   ]
 })

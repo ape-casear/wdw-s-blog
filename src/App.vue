@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <div name="header" >
-      <img class="main_logo"   @click="click" src="./assets/logo.png">
+      <img class="main_logo"   @click="logoclick" src="./assets/logo.png">
       <span style="float:right">
         <ul class="mainbar">
           <li>
@@ -51,9 +51,9 @@ export default {
       window.location.reload();
       router.push({name:'FirstRouter'})
     },
-    click: function() {
-      this.username = this.username+"0";
-      console.log(this.username)
+    logoclick: function() {
+     router.push({name:'Regist'})
+      
     }
   },
   mounted: function(){

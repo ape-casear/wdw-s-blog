@@ -3,7 +3,7 @@
     <span @click="click"  >menu_1</span><span :class="{arrowUP:isShow, arrowDown:!isShow}"></span><br>
     <ul :class="{show:isShow, not_show:!isShow, position:true}">
             <li v-for="li in main_lis" :key="li.id" >
-                <a>{{li.name}}</a>
+                <a :href="'#/'+li.name">{{li.name}}</a>
             </li>
     </ul>
   </div>
@@ -22,6 +22,9 @@ export default {
   methods: {
       click:function(event){
         this.isShow = !this.isShow
+      },
+      router:function(){
+        
       }
   }
 }
