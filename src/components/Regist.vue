@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div id="regist">
     <h1>{{msg}}</h1>
-    <span>username:</span><input type="text" v-model="input_username"  placeholder="please type your name">
+    <span>username:</span><input type="text" v-model="input_username"  placeholder="please type your name" style="width:140px">
     <input type="submit" value="submit" @click="submit"/>
   </div>
 </template>
@@ -29,7 +29,11 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 h1, h2 {
+  padding:20px;
   font-weight: normal;
+}
+#regist{
+  height: 300px;
 }
 
 </style>

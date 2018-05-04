@@ -1,7 +1,7 @@
 <template>
   <div>
-    <span @click="click"  >menu_1{{toConponentData2.isShow}}</span><span :class="{arrowUP:isShow, arrowDown:!isShow}"></span><br>
-    <ul :class="{show:toConponentData2.isShow, not_show:!isShow, position:true}">
+    <span @click="click"  >menu_2</span><span :class="{arrowUP:isShow, arrowDown:!isShow}"></span><br>
+    <ul :class="{show:isShow, not_show:!isShow, position:true}">
         <div style="background:white; border-radius: 6px"> 
             <li v-for="li in main_lis" :key="li.id" >
                 <a :href="'#/'+li.name" @click="click">{{li.name}}</a>
@@ -13,24 +13,21 @@
 
 <script>
 export default {
-  name: 'HeaderMenu',
-  props: ['toConponentData2'],
+  name: 'HeaderMenu2',
+  props: [],
   data () {
       return {
-          main_lis: '',
-          isShow:'',
+          main_lis: [{id:0,name:'label1'},{id:1,name:'label2'}],
+          isShow: false
       }
   },
   methods: {
       click:function(event){
-          this.isShow = !this.isShow
+        this.isShow = !this.isShow
       },
       router:function(){
-          
-          }
-  },
-  mounted: function(){
         
+      }
   }
 }
 </script>
@@ -52,6 +49,8 @@ export default {
         margin: 0px;
         padding: 4px;
         padding-right: 6px;
+  
+        
     }
     li:hover,span:hover,a:hover{
         /* background-color: rgb(241, 241, 231); */
