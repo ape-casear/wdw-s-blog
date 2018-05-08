@@ -5,16 +5,16 @@
       <span style="float:right; margin-top:30px">
         <ul class="mainbar">
           <li>
-            <span  is="HeaderMenu" :toConponentData2="toConponentData2"></span>
+            <span  is="HeaderMenu" @click="close" :dataFromApp="toConponentData1"></span>
           </li>
           <li>
-            <span  is="HeaderMenu" ></span>
+            <span  is="HeaderMenu"  @click="close"  :dataFromApp="toConponentData2"></span>
           </li>
           <li v-if="user.name==''">
             <router-link to="regist">登录</router-link>
           </li>
           <li v-if="user.name!=''" @userlogin="userLogin">
-            <router-link to="userInfo">{{username}}</router-link>
+            你好:<router-link to="userInfo">{{username}}</router-link>
           </li>
           <li>
             <router-link to="wdw">wdw</router-link>
@@ -47,7 +47,6 @@
 
 <script >
 import HeaderMenu from "./components/HeaderMenu";
-//import HeaderMenu2 from "./components/HeaderMenu2";
 import router from "./router/index";
 import bus from "./bus.js";
 export default {
@@ -57,15 +56,14 @@ export default {
       user:{name:'',age:0},
       username:'',
       toViewData:{},
-      toConponentData1:{main_lis: [{id:0,name:'blog'},{id:1,name:'bloglist'}],isShow: false},
-      toConponentData2:{ main_lis: [{id:0,name:'label1'},{id:1,name:'label2'}],isShow: false}
+      toConponentData1:{main_lis: [{id:0,name:'hello'},{id:1,name:'bloglist'}],title: '博客'},
+      toConponentData2:{ main_lis: [{id:0,name:'Snake'},{id:1,name:'扫雷'}],title: '游戏'}
     
     }
   },
   name: 'App',
   components: {
-    HeaderMenu,
-    //HeaderMenu2,
+    HeaderMenu
   },
   methods: {
     userLogin: function (user) {
@@ -80,10 +78,13 @@ export default {
       router.push({name:'FirstRouter'})
     },
     logoclick: function() {
-      this.toConponentData2='wdw';
-      console.log(this.toConponentData2)
+      
+     console.log(this.toConponentData2)
      router.push({name:'Regist'})
       
+    },
+    close: function(event){
+      console.log(event)
     }
   },
   mounted: function(){
@@ -101,6 +102,7 @@ export default {
     }
     this.username = this.user.name;
     bus.$on('userlogin',this.$options.methods.userLogin)
+   
   },
   watch: {
     $route: function (newVal,val) {
@@ -110,7 +112,9 @@ export default {
         
       }else if(newVal.name==='BlogList'){
         
-        this.toViewData=[{id:0,blogtitle:'blog1'},{id:1,blogtitle:'blog2'}]
+        this.toViewData=[{id:0,title:'blog1',author:'wdw',pub_date:'2018-05-04',like:21,browse_count:2000},
+              {id:1,title:'blog2',author:'wdw',pub_date:'2018-05-04',like:21.8,browse_count:2000},
+              {id:2,title:'blog3',author:'wdw',pub_date:'2018-05-04',like:21,browse_count:2000}]
       }
       
     }
@@ -121,6 +125,16 @@ export default {
 
 <style>
 *{ padding:0; margin:0}
+a{
+      text-decoration: none;
+      opacity: 0.5;
+      color: black;
+}
+a:hover{
+      /* background-color: rgb(241, 241, 231); */
+      opacity: 1;
+      cursor:pointer;
+}
 div header aside{
   display: block;
 }

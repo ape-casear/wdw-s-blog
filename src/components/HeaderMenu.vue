@@ -1,9 +1,9 @@
 <template>
   <div>
-    <span @click="click"  >menu_1{{toConponentData2.isShow}}</span><span :class="{arrowUP:isShow, arrowDown:!isShow}"></span><br>
-    <ul :class="{show:toConponentData2.isShow, not_show:!isShow, position:true}">
+    <span @click="click"  >{{dataFromApp.title}}</span><span :class="{arrowUP:isShow, arrowDown:!isShow}"></span><br>
+    <ul :class="{show:isShow, not_show:!isShow, position:true}">
         <div style="background:white; border-radius: 6px"> 
-            <li v-for="li in main_lis" :key="li.id" >
+            <li v-for="li in dataFromApp.main_lis" :key="li.id" >
                 <a :href="'#/'+li.name" @click="click">{{li.name}}</a>
             </li>
         </div>
@@ -14,20 +14,21 @@
 <script>
 export default {
   name: 'HeaderMenu',
-  props: ['toConponentData2'],
+  props: ['dataFromApp'],
   data () {
       return {
-          main_lis: '',
-          isShow:'',
+          main_lis: [{id:0,name:'blog'}, {id:1,name:'bloglist'}],
+          isShow:false,
       }
   },
   methods: {
       click:function(event){
-          this.isShow = !this.isShow
+          this.isShow = !this.isShow;
+          this.$emit('expand',{title:'abc'});
       },
-      router:function(){
-          
-          }
+      close:function(){
+          this.isShow = false;
+      }
   },
   mounted: function(){
         

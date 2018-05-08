@@ -20,7 +20,7 @@ export default {
 }
 </script>
 <style scoped>
-    .FontWeightNormal{
-      font-weight: normal;
-    }
+.FontWeightNormal{
+  font-weight: normal;
+}
 </style>
