@@ -1,10 +1,12 @@
 <template>
     <div id="bloglist">
         <h1>BlogList</h1>
-        <div v-for="blog in toViewData" :key="blog.id">
+        <div v-for="blog in toViewData" :key="blog.id" >
             <div class="blog">
+                <span style="margin:0px;">：）</span>
                 <span style="color:rgb(83, 20, 20); font-size:18px">{{blog.browse_count}}</span>
-                <span><a class="bloghref">{{blog.title}}</a></span>
+                <span><a class="bloghref" href="javascript:void(0)" @click="clickBlog" :name="blog.id+'::'+blog.browse_count+'::'+blog.pub_date
+                    +'::'+blog.like+'::'+blog.author" >{{blog.title}}</a></span>
                 <span style="color:rgb(60, 20, 20); font-weight:400;" class="right">{{blog.author}}</span>
                 <span class="right">{{blog.pub_date}}</span>
                 <span class="right">{{blog.like}}</span>
@@ -26,6 +28,16 @@ export default {
       bloglist: function(){
           console.log('toViewData change')
       }
+  },
+  mounted:function (){
+     
+  },
+  methods: {
+       clickBlog: function (event) {
+           let blog = event.target;
+          
+           this.$router.push({name:'Blog', query: {id: blog.getAttribute('name')}})
+       }
   }
 }
 </script>
@@ -60,7 +72,7 @@ export default {
     opacity: 1;
     color:rgb(83, 14, 14);
 }
-span{
+.blog > span{
     margin-left :3px;
     margin-right:10px;
 }

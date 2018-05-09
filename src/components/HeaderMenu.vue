@@ -25,6 +25,7 @@ export default {
       click:function(event){
           this.isShow = !this.isShow;
           this.$emit('expand',{title:'abc'});
+          event.initEvent('click',false,false);
       },
       close:function(){
           this.isShow = false;
