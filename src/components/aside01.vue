@@ -4,7 +4,7 @@
           <img src="../assets/head.png" class="headPic"/>
           <span >ape-Caesar</span>
           <span class="add" @mouseover="showQRcode = !showQRcode" @mouseout="showQRcode = !showQRcode">加好友</span><br>
-          <span>天津大学</span>
+          <span><a href="http://www.tju.edu.cn/">天津大学</a></span>
           <img id="QRcode" src="../assets/head.png" :class="{showQRcode: showQRcode,notshowQRcode: !showQRcode}"/>
       </div>
       <div style="height:1px; width:100%; margin-top:30px; margin-bottom=20px; border-top:1px #888 solid"></div>

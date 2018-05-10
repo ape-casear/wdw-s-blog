@@ -1,6 +1,6 @@
 <template>
   <div>
-    <span @click="click"  >{{dataFromApp.title}}</span><span :class="{arrowUP:isShow, arrowDown:!isShow}"></span><br>
+    <span @click="click"  class="headermenu">{{dataFromApp.title}}</span><span :class="{arrowUP:isShow, arrowDown:!isShow}"></span><br>
     <ul :class="{show:isShow, not_show:!isShow, position:true}">
         <div style="background:white; border-radius: 6px"> 
             <li v-for="li in dataFromApp.main_lis" :key="li.id" >
@@ -12,6 +12,7 @@
 </template>
 
 <script>
+import bus from "../bus";
 export default {
   name: 'HeaderMenu',
   props: ['dataFromApp'],
@@ -24,8 +25,14 @@ export default {
   methods: {
       click:function(event){
           this.isShow = !this.isShow;
-          this.$emit('expand',{title:'abc'});
-          event.initEvent('click',false,false);
+         
+       /*    for(let key in event.target){
+              if(typeof event.target[key] == 'string'){
+                  console.log(`key:${key}, value:${event.target[key]}`)
+              }
+          } */
+          this.$emit('closeOther',{title: event.target.innerHTML});
+          
       },
       close:function(){
           this.isShow = false;

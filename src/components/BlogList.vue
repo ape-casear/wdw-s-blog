@@ -1,6 +1,13 @@
 <template>
     <div id="bloglist">
         <h1>BlogList</h1>
+        <div style="display: block; height:30px; ">
+            <div style="float: right">
+                <span>排序：</span>
+                <span class="sort"><a>时间</a></span>
+                <span class="sort"><a>热度</a></span>
+            </div>
+        </div>
         <div v-for="blog in toViewData" :key="blog.id" >
             <div class="blog">
                 <span style="margin:0px;">：）</span>
@@ -21,7 +28,8 @@ export default {
   data () {
       return {
           //bloglist:[],
-          msg:''
+          msg:'',
+          isShow: false
       }
   },
   watch: {
@@ -37,12 +45,26 @@ export default {
            let blog = event.target;
           
            this.$router.push({name:'Blog', query: {id: blog.getAttribute('name')}})
+       },
+       sort: function () {
+            this.isShow = !this.isShow;
        }
   }
 }
 </script>
 
 <style>
+.sort{
+    border: 1px solid  rgb(202, 197, 169);
+    border-radius: 8%;
+    margin-right: 10px;
+}
+.sort > a{
+    color:  rgb(112, 108, 87);
+}
+.sort:hover{
+    background-color:  rgb(236, 234, 218);
+}
 .blog{
     padding:10px;
     background-color: rgb(220, 228, 227);

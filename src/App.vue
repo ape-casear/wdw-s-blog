@@ -1,14 +1,14 @@
 <template>
-  <div id="app" style="min-height: 1000px">
+  <div id="app" style="min-height: 1000px" @click = "bodyclick">
     <div name="header" >
       <img class="main_logo"   @click="logoclick" src="./assets/logo.png">
       <span style="float:right; margin-top:30px">
         <ul class="mainbar">
           <li>
-            <span  is="HeaderMenu" @click="close" :dataFromApp="toConponentData1"></span>
+            <span  is="HeaderMenu"  :dataFromApp="toConponentData1" @closeOther="closeOther" ref="blog"></span>
           </li>
           <li>
-            <span  is="HeaderMenu"  @click="close"  :dataFromApp="toConponentData2"></span>
+            <span  is="HeaderMenu"   :dataFromApp="toConponentData2" @closeOther="closeOther" ref="game"></span>
           </li>
           <li v-if="user.name==''">
             <router-link to="regist">登录</router-link>
@@ -41,7 +41,7 @@
         </div>
       </main>
       <div id="comment" v-if="showComment" >
-        <div is="comment"></div>
+        <div is="comment" :toCommentData="toCommentData"></div>
       </div>
     </div>
     <!-- <footer>
@@ -55,7 +55,6 @@ import HeaderMenu from "./components/HeaderMenu";
 import aside01 from "./components/aside01";
 import router from "./router/index";
 import bus from "./bus.js";
-import request from "./lib/request";
 import comment from "./components/Comment";
 export default {
   data () {
@@ -66,7 +65,8 @@ export default {
       toViewData:{},
       toConponentData1:{main_lis: [{id:0,name:'blog'},{id:1,name:'bloglist'}],title: '博客'},
       toConponentData2:{ main_lis: [{id:0,name:'Snake'},{id:1,name:'Mineclear'}],title: '游戏'},
-      showComment: false
+      showComment: false,
+      toCommentData: {}
     
     }
   },
@@ -94,8 +94,29 @@ export default {
      router.push({name:'Regist'})
       
     },
-    close: function(event){
-      console.log(event)
+    closeOther: function(event){
+      let type;
+      if(event.title == '游戏'){
+        type = 'game'
+      }else if(event.title == '博客'){
+        type = 'blog'
+      }
+      for(let key in this.$refs){
+        if(key !== type){
+           this.$refs[key].isShow = false;
+        }
+      }
+
+    },
+    bodyclick: function (event) {
+      
+      if(event.target.getAttribute('class') === 'headermenu'){
+        
+        return;
+      }
+      for(let key in this.$refs){
+           this.$refs[key].isShow = false;
+      }
     }
   },
   mounted: function(){
@@ -128,15 +149,22 @@ export default {
               {id:1,title:'blog2',author:'wdw',pub_date:'2018-05-04',like:21.8,browse_count:2000},
               {id:2,title:'blog3',author:'wdw',pub_date:'2018-05-04',like:21,browse_count:2000}];
         
-        /* let res = request.get('bloglist接口');
-        console.log(res) */
+        //let res = this.$ajax.get('bloglist接口');
+        //let res = this.$ajax.get('www.baidu.com');
+  
       }else if(newVal.name==='Blog'){
         //查询blog表 表结构为 {id,bloglistid,content}  从newVAL中得到blog的数据，并查表得到内容content,然后将blog数据通过toViewData传输过去
         console.log('-----')
         console.log(router.query)
-       /*  let res = request.get('blog接口');*/
+       /*  let res = request.get('blog接口');
+            let comments = this.$ajax.get('comment接口')*/
 
         this.toViewData = {}; 
+        this.toCommentData = {comments:[{id:1, user: '独孤求败', comment: '丢你老谋', comment_datatime: '2018-05-09 12:32:11', floor: 1, sub_comment: 
+                                          [{id:5,user: '令狐冲', comment: '日月神教，一统中原', comment_datatime: '2018-05-09 12:32:11', floor: 1},
+                                          {id:4,user: '任盈盈', comment: '日月神教，一统中原', comment_datatime: '2018-05-09 12:32:11', floor: 2}]},
+                              {id:2,user: '西门吹雪', comment: '丢你老谋', comment_datatime: '2018-05-09 12:32:11', floor: 2},
+                              {id:3,user: '东方不败', comment: '丢你老谋', comment_datatime: '2018-05-09 12:32:11', floor: 3}]};
         this.showComment = true;
       }
       
