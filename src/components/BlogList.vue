@@ -3,14 +3,14 @@
         <h1>BlogList</h1>
         <div style="display: block; height:30px; ">
             <div style="float: right">
-                <span>排序：</span>
-                <span class="sort"><a>时间</a></span>
-                <span class="sort"><a>热度</a></span>
+                <span><i class="el-icon-sort"></i>排序：</span>
+                <span class="sort" @click="sortclick"><a>时间</a></span>
+                <span class="sort" @click="sortclick"><a>热度</a></span>
             </div>
         </div>
         <div v-for="blog in toViewData" :key="blog.id" >
             <div class="blog">
-                <span style="margin:0px;">：）</span>
+                <span style="margin:0px;"><i class="el-icon-view"></i></span>
                 <span style="color:rgb(83, 20, 20); font-size:18px">{{blog.browse_count}}</span>
                 <span><a class="bloghref" href="javascript:void(0)" @click="clickBlog" :name="blog.id+'::'+blog.browse_count+'::'+blog.pub_date
                     +'::'+blog.like+'::'+blog.author" >{{blog.title}}</a></span>
@@ -29,13 +29,11 @@ export default {
       return {
           //bloglist:[],
           msg:'',
-          isShow: false
+          
       }
   },
   watch: {
-      bloglist: function(){
-          console.log('toViewData change')
-      }
+  
   },
   mounted:function (){
      
@@ -46,8 +44,18 @@ export default {
           
            this.$router.push({name:'Blog', query: {id: blog.getAttribute('name')}})
        },
-       sort: function () {
-            this.isShow = !this.isShow;
+       sortclick: function (event) {
+           let sorttype = event.target.innerHTML;
+           if(sorttype == '时间'){
+               console.log(this.$route.params)
+           
+               this.$route.params.sorttype = 'time';
+         
+           }else if(sorttype == '热度'){
+               this.$route.params.sorttype = 'hot';
+           }
+            let query = this.$route.params;
+            this.$router.push({name:'BlogList', query: query, params: query})
        }
   }
 }

@@ -2,7 +2,7 @@
   <div id="app" style="min-height: 1000px" @click = "bodyclick">
     <div name="header" >
       <img class="main_logo"   @click="logoclick" src="./assets/logo.png">
-      <span style="float:right; margin-top:30px">
+      <span style="float:right; margin-top:30px; font-size:17px">
         <ul class="mainbar">
           <li>
             <span  is="HeaderMenu"  :dataFromApp="toConponentData1" @closeOther="closeOther" ref="blog"></span>
@@ -28,11 +28,13 @@
     <div class="container">
       <aside style="width:25%; float:right; background-color: rgb(234, 244, 245); padding:0px; margin-right:1%">
         <div class="aside-box">
-          <aside01></aside01>
+          <aside01 :toAside01Data="toAside01Data"></aside01>
         </div>
         <div class="aside-box">
-          <h5>aside2</h5>
-          <p>123455</p>
+          <aside02 :toAside02Data="toAside02Data"></aside02>
+        </div>
+        <div class="aside-box" style="padding:0px;">
+          <aside03></aside03>
         </div>
       </aside>
       <main >
@@ -53,6 +55,8 @@
 <script >
 import HeaderMenu from "./components/HeaderMenu";
 import aside01 from "./components/aside01";
+import aside02 from "./components/aside02";
+import aside03 from "./components/aside03";
 import router from "./router/index";
 import bus from "./bus.js";
 import comment from "./components/Comment";
@@ -66,7 +70,9 @@ export default {
       toConponentData1:{main_lis: [{id:0,name:'blog'},{id:1,name:'bloglist'}],title: '博客'},
       toConponentData2:{ main_lis: [{id:0,name:'Snake'},{id:1,name:'Mineclear'}],title: '游戏'},
       showComment: false,
-      toCommentData: {}
+      toCommentData: {},
+      toAside01Data: {},
+      toAside02Data: {}
     
     }
   },
@@ -74,6 +80,8 @@ export default {
   components: {
     HeaderMenu,
     aside01,
+    aside02,
+    aside03,
     comment
   },
   methods: {
@@ -119,9 +127,11 @@ export default {
       }
     }
   },
-  mounted: function(){
+  mounted: async function(){
     //console.log(this.$options.methods.userLogin)
-    console.log('mounted 执行')
+    console.log('mounted 执行 初始化index页面')
+
+    //初始化用户信息，localStrorage存储用户信息
     if( localStorage.user){
       try{
         let preUser = JSON.parse(localStorage.user)
@@ -133,33 +143,46 @@ export default {
       }
     }
     this.username = this.user.name;
+
+    //注册登录事件
     bus.$on('userlogin',this.$options.methods.userLogin)
-   
+
+    //初始化 aside01
+    /* let result_aside01 = await this.$ajax.get('aside01接口')
+    this.toAside01Data = result_aside01.data; */
+    this.toAside01Data = {blogs: 99, comments: 999999, visits: 99};
+    this.toAside02Data = {types:[{name:'nodejs', count: 12},{name: 'java', count: 21},{ name: '闲聊', count: 5}]}
   },
   watch: {
-    $route: function (newVal,val) {
+    $route: async function (newVal,val) {
       console.log(newVal)
       console.log(val)
       this.showComment = false;
       if(newVal.name===""){
         
       }else if(newVal.name==='BlogList'){
-        
+        let url = 'http://localhost:8080/bloglist?';
+        if( newVal.query.type){
+          url += 'type=' + newVal.query.type + "&";
+        }
+        if(newVal.query.sorttype){
+          url += 'sorttype=' + newVal.query.sorttype + "&";
+        }
+        console.log(url)
+        console.log(this.$route.params)
+        //let res = await this.$ajax.get('bloglist接口');
+        //let res = this.$ajax.get('www.baidu.com');
         this.toViewData = [{id:0,title:'blog1',author:'wdw',pub_date:'2018-05-04',like:21,browse_count:2000},
               {id:1,title:'blog2',author:'wdw',pub_date:'2018-05-04',like:21.8,browse_count:2000},
               {id:2,title:'blog3',author:'wdw',pub_date:'2018-05-04',like:21,browse_count:2000}];
         
-        //let res = this.$ajax.get('bloglist接口');
-        //let res = this.$ajax.get('www.baidu.com');
   
       }else if(newVal.name==='Blog'){
         //查询blog表 表结构为 {id,bloglistid,content}  从newVAL中得到blog的数据，并查表得到内容content,然后将blog数据通过toViewData传输过去
         console.log('-----')
-        console.log(router.query)
-       /*  let res = request.get('blog接口');
+        
+       /*  let res = await request.get('blog接口');
             let comments = this.$ajax.get('comment接口')*/
-
-        this.toViewData = {}; 
         this.toCommentData = {comments:[{id:1, user: '独孤求败', comment: '丢你老谋', comment_datatime: '2018-05-09 12:32:11', floor: 1, sub_comment: 
                                           [{id:5,user: '令狐冲', comment: '日月神教，一统中原', comment_datatime: '2018-05-09 12:32:11', floor: 1},
                                           {id:4,user: '任盈盈', comment: '日月神教，一统中原', comment_datatime: '2018-05-09 12:32:11', floor: 2}]},

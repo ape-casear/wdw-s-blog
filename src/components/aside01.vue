@@ -3,23 +3,27 @@
       <div id="aside01_top">
           <img src="../assets/head.png" class="headPic"/>
           <span >ape-Caesar</span>
-          <span class="add" @mouseover="showQRcode = !showQRcode" @mouseout="showQRcode = !showQRcode">加好友</span><br>
-          <span><a href="http://www.tju.edu.cn/">天津大学</a></span>
-          <img id="QRcode" src="../assets/head.png" :class="{showQRcode: showQRcode,notshowQRcode: !showQRcode}"/>
+          <span class="add" @mouseover="showQRcode = !showQRcode" @mouseout="showQRcode = !showQRcode"><i class="el-icon-circle-plus-outline"></i>加好友</span><br>
+          <span><a href="http://www.tju.edu.cn/" target="blank"><i class="el-icon-location-outline"></i>天津大学</a></span>
+          <transition name="el-zoom-in-center">
+            <div v-show="showQRcode" class="transition-box">
+                <img id="QRcode" src="../assets/head.png" :class="{showQRcode: showQRcode, notshowQRcode: !showQRcode}" />
+            </div>
+          </transition>
       </div>
       <div style="height:1px; width:100%; margin-top:30px; margin-bottom=20px; border-top:1px #888 solid"></div>
       <div id="aside01_bottom">
           <dl>
-            <dt>BLOG</dt>
-            <dd>21</dd>
+            <dt><i class="el-icon-document"></i>blog</dt>
+            <dd>{{toAside01Data.blogs}}</dd>
           </dl>
           <dl>
-            <dt>访问</dt>
-            <dd>88</dd>
+            <dt><i class="el-icon-star-on"></i>访问</dt>
+            <dd>{{toAside01Data.visits}}</dd>
           </dl>
           <dl>
-            <dt>评论</dt>
-            <dd>12</dd>
+            <dt><i class="el-icon-edit-outline"></i>评论</dt>
+            <dd>{{toAside01Data.comments}}</dd>
           </dl>
       </div>
   </div>
@@ -27,6 +31,7 @@
 
 <script>
 export default {
+  props:['toAside01Data'],
   data(){
       return {
           showQRcode: false,
@@ -39,6 +44,9 @@ export default {
 </script>
 
 <style>
+    #aside01_bottom > dl{
+        font-size: 14px;
+    }
     .add{
         color:  rgb(216, 84, 84);
     }
@@ -53,13 +61,13 @@ export default {
         width: 200px;
         height: 200px;
         position: absolute;
-        top: 20%; left: 45%;
+       
         border-radius: 5%;
         z-index: 2;
     }
     #aside01_top > span {
         margin-top: 50px;
-        margin:8%;
+        margin:6%;
         position: relative;
     
     }
@@ -83,7 +91,7 @@ export default {
     #aside01_bottom > dl{ 
         display: block;
         align-self: auto;
-        margin:9%;
+        margin:8%;
     }
 </style>
 
