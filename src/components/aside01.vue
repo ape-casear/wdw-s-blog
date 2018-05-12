@@ -44,6 +44,11 @@ export default {
 </script>
 
 <style>
+    .transition-box{
+   
+        -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        box-shadow:  0 5px 10px rgba(0, 0, 0, 0.2);
+    }
     #aside01_bottom > dl{
         font-size: 14px;
     }
@@ -62,6 +67,7 @@ export default {
         height: 200px;
         position: absolute;
        
+        
         border-radius: 5%;
         z-index: 2;
     }

@@ -8,6 +8,9 @@
             <span  is="HeaderMenu"  :dataFromApp="toConponentData1" @closeOther="closeOther" ref="blog"></span>
           </li>
           <li>
+            <span  is="HeaderMenu"  :dataFromApp="toConponentData3" @closeOther="closeOther" ref="spider"></span>
+          </li>
+          <li>
             <span  is="HeaderMenu"   :dataFromApp="toConponentData2" @closeOther="closeOther" ref="game"></span>
           </li>
           <li v-if="user.name==''">
@@ -17,7 +20,7 @@
             你好:<router-link to="userInfo">{{username}}</router-link>
           </li>
           <li>
-            <router-link to="wdw">wdw</router-link>
+            <router-link to="wdw">RESUME</router-link>
           </li>
         </ul>
       </span>
@@ -67,8 +70,9 @@ export default {
       user:{name:'',age:0},
       username:'',
       toViewData:{},
-      toConponentData1:{main_lis: [{id:0,name:'blog'},{id:1,name:'bloglist'}],title: '博客'},
+      toConponentData1:{ main_lis: [{id:0,name:'blog'},{id:1,name:'bloglist'}],title: '博客'},
       toConponentData2:{ main_lis: [{id:0,name:'Snake'},{id:1,name:'Mineclear'}],title: '游戏'},
+      toConponentData3:{ main_lis: [{id:0,name:'zhihu'},{id:1,name:'A'}],title: '爬虫'},
       showComment: false,
       toCommentData: {},
       toAside01Data: {},
@@ -108,6 +112,8 @@ export default {
         type = 'game'
       }else if(event.title == '博客'){
         type = 'blog'
+      }else if(event.title == '爬虫'){
+        type = 'spider'
       }
       for(let key in this.$refs){
         if(key !== type){

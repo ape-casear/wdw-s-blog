@@ -5,7 +5,8 @@ import App from './App'
 import router from './router'
 import axios from 'axios'
 import ElementUI from 'element-ui';
-import 'element-ui/lib/theme-chalk/index.css';
+import 'element-ui/lib/theme-chalk/index.css'; //引入ui组件
+import $ from 'jquery';//引入jquery
 
 Vue.config.productionTip = false
 Vue.use(ElementUI)

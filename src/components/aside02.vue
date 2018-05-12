@@ -29,6 +29,9 @@ export default {
               console.log(spans.length)
               type = spans[0].innerHTML;
           }
+          if(type == '闲聊'){
+              type = 'chart';
+          }
           console.log(type)
       
           this.$router.push({name: 'BlogList', query: { type } ,params:{ type}});  
