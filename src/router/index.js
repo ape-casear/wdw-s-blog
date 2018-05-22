@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Regist from '@/components/Regist'
+import login from '@/components/login'
+import Write from '@/components/write'
 import FirstRouter from '@/components/FirstRouter'
 import UserInfo from '@/components/UserInfo'
 import MarkDown from '@/components/MarkDown'
@@ -22,6 +24,11 @@ export default new Router({
       path: '/regist',
       name: 'Regist',
       component: Regist
+    },
+    {
+      path: '/login',
+      name: 'Login',
+      component: login
     },
     {
       path: '/',
@@ -55,6 +62,11 @@ export default new Router({
       path: '/mineclear',
       name: 'Mineclear',
       component: Mineclear
+    },
+    {
+      path: '/write',
+      name: 'Write',
+      component: Write
     },
 
   ]

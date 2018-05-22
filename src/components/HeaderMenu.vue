@@ -2,7 +2,7 @@
   <div>
     <span @click="click"  class="headermenu">{{dataFromApp.title}}</span><span :class="{arrowUP:isShow, arrowDown:!isShow}"></span><br>
     <ul :class="{show:isShow, not_show:!isShow, position:true}">
-        <div style="background:white; border-radius: 6px"> 
+        <div style="background:white; border-radius: 6px" class="div_li" > 
             <li v-for="li in dataFromApp.main_lis" :key="li.id" >
                 <a :href="'#/'+li.name" @click="click">{{li.name}}</a>
             </li>
@@ -45,6 +45,10 @@ export default {
 </script>
 
 <style scoped>
+    .div_li{
+         -webkit-box-shadow:  0 5px 10px rgba(0, 0, 0, 0.2);
+        box-shadow:  0 5px 10px rgba(0, 0, 0, 0.2);
+    }
     a,span{
         text-decoration: none;
         opacity: 0.5;

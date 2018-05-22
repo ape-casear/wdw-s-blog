@@ -14,13 +14,16 @@
             <span  is="HeaderMenu"   :dataFromApp="toConponentData2" @closeOther="closeOther" ref="game"></span>
           </li>
           <li v-if="user.name==''">
-            <router-link to="regist">登录</router-link>
+            <router-link to="regist">注册</router-link>
           </li>
-          <li v-if="user.name!=''" @userlogin="userLogin">
+          <li v-if="user.name==''">
+            <router-link to="login">登录</router-link>
+          </li>
+          <li v-if="user.name!=''">
             你好:<router-link to="userInfo">{{username}}</router-link>
           </li>
-          <li>
-            <router-link to="wdw">RESUME</router-link>
+          <li v-if="user.name=='wdw'">
+            <router-link to="write">WRITE</router-link>
           </li>
         </ul>
       </span>
@@ -42,11 +45,11 @@
       </aside>
       <main >
         <div id="router-view" >
-          <router-view :toViewData="toViewData"/>
+          <router-view :toViewData="toViewData"  @login='userLogin'  @userRegist="userRegist"/>
         </div>
       </main>
       <div id="comment" v-if="showComment" >
-        <div is="comment" :toCommentData="toCommentData"></div>
+        <div is="comment" :toCommentData="toCommentData" @add_reply="add_reply" @add_comment="add_comment"></div>
       </div>
     </div>
     <!-- <footer>
@@ -63,6 +66,7 @@ import aside03 from "./components/aside03";
 import router from "./router/index";
 import bus from "./bus.js";
 import comment from "./components/Comment";
+import jsSHA from "./lib/jsSHA/src/sha.js";
 export default {
   data () {
     return{
@@ -89,15 +93,56 @@ export default {
     comment
   },
   methods: {
-    userLogin: function (user) {
-      console.log('userlogin 执行')
+    add_reply: function(data){
+      data.author = this.username;
+      console.log(data)
+      //this.$ajax.post('localhost/comment',{ bloglistid, content, author, parent })
+    },
+    add_comment: function(data){
+      data.author = this.username;
+      console.log(data)
+      //this.$ajax.post('localhost/comment',{ bloglistid, content, author, parent:0 })
+    },
+    userRegist: function (user) {
+      console.log('userRegist 执行')
+      let shaObj = new jsSHA("SHA-256","TEXT");
+      shaObj.update(user.password+'wdwblog')
       this.username = user.name;
-    
+      user.password = shaObj.getHash("HEX");
+      user.author = user.name;
+      console.log(user)
+      /*
+      let result = this.$ajax.post('localhost/user',{user})
+      if(!result.code==0){
+        this.message.error("注册失败")
+        return;
+      }
+      */
       sessionStorage.user = user;
       localStorage.user = JSON.stringify(user);
       this.user = user;
-      console.log(this.user.name)
-      window.location.reload();
+      console.log(this.username)
+      
+      router.push({name:'FirstRouter'})
+    },
+    userLogin: function(user){
+      console.log('userlogin 执行')
+      let shaObj = new jsSHA("SHA-256","TEXT");
+      shaObj.update(user.password+'wdwblog')
+      this.username = user.name;
+      user.password = shaObj.getHash("HEX");
+      user.author = user.name;
+      console.log(user)
+      /*
+      let result = this.$ajax.post('localhost/user',{user})
+      if(!result.code==0){
+        this.message.error("登录失败")
+        return;
+      }
+      */
+      sessionStorage.user = user;
+      localStorage.user = JSON.stringify(user);
+      this.user = user;
       router.push({name:'FirstRouter'})
     },
     logoclick: function() {
@@ -123,9 +168,7 @@ export default {
 
     },
     bodyclick: function (event) {
-      
       if(event.target.getAttribute('class') === 'headermenu'){
-        
         return;
       }
       for(let key in this.$refs){
@@ -151,10 +194,10 @@ export default {
     this.username = this.user.name;
 
     //注册登录事件
-    bus.$on('userlogin',this.$options.methods.userLogin)
+    bus.$on('userRegist',this.$options.methods.userRegist)
 
     //初始化 aside01
-    /* let result_aside01 = await this.$ajax.get('aside01接口')
+    /* let result_aside01 = await this.$ajax.get('localhost/web_info')
     this.toAside01Data = result_aside01.data; */
     this.toAside01Data = {blogs: 99, comments: 999999, visits: 99};
     this.toAside02Data = {types:[{name:'nodejs', count: 12},{name: 'java', count: 21},{ name: '闲聊', count: 5}]}
@@ -187,13 +230,15 @@ export default {
         //查询blog表 表结构为 {id,bloglistid,content}  从newVAL中得到blog的数据，并查表得到内容content,然后将blog数据通过toViewData传输过去
         console.log('-----')
         
-       /*  let res = await request.get('blog接口');
-            let comments = this.$ajax.get('comment接口')*/
-        this.toCommentData = {comments:[{id:1, user: '独孤求败', comment: '丢你老谋', comment_datatime: '2018-05-09 12:32:11', floor: 1, sub_comment: 
-                                          [{id:5,user: '令狐冲', comment: '日月神教，一统中原', comment_datatime: '2018-05-09 12:32:11', floor: 1},
-                                          {id:4,user: '任盈盈', comment: '日月神教，一统中原', comment_datatime: '2018-05-09 12:32:11', floor: 2}]},
-                              {id:2,user: '西门吹雪', comment: '丢你老谋', comment_datatime: '2018-05-09 12:32:11', floor: 2},
-                              {id:3,user: '东方不败', comment: '丢你老谋', comment_datatime: '2018-05-09 12:32:11', floor: 3}]};
+       /*  let res = await request.get('blog接口',{bloglistid: newVal.query.id});
+            let comments = this.$ajax.get('comment接口',{bloglistid: newVal.query.id)*/
+        let bloglist_data = JSON.parse(newVal.params.json_str_data)
+        this.toCommentData = {bloglistid: bloglist_data.id,
+                              comments:[{id:1, user: '独孤求败', comment: '丢你老谋', comment_datatime: '2018-05-09 12:32:11', sub_comment: 
+                                          [{id:5,user: '令狐冲', comment: '日月神教，一统中原', comment_datatime: '2018-05-09 12:32:11'},
+                                          {id:4,user: '任盈盈', comment: '日月神教，一统中原', comment_datatime: '2018-05-09 12:32:11'}]},
+                              {id:2,user: '西门吹雪', comment: '丢你老谋', comment_datatime: '2018-05-09 12:32:11' },
+                              {id:3,user: '东方不败', comment: '丢你老谋', comment_datatime: '2018-05-09 12:32:11'}]};
         this.showComment = true;
       }
       

@@ -1,12 +1,12 @@
 <template>
-  <div class="comment_box">
+  <div class="comment_box" :data_id="toCommentData.bloglistid" >
       <h2>评论</h2>
       <div v-for="(comment,index) in toCommentData.comments" :key="comment.id">
         <div :name="comment.id">
           <span class="floor" >#{{index+1}}楼</span>
           <span class="comment_datatime">{{comment.comment_datatime}}</span>
           <span  >{{comment.user}}</span>
-          <span class="reply" @click="add_reply" :name="comment.id">回复</span>
+          <span class="reply" @click="open_reply" :name="comment.id">回复</span>
          
         </div>
         <div class="comment_main">
@@ -25,10 +25,11 @@
           </div>
         </div>
       </div>
+ 
       <div class="add_comment">
         <h3>添加评论</h3>
         <textarea class="textarea"  name="add_comment" placeholder="说些什么……" wrap="physical"/>
-        
+
           <button  name="submit" value="提交" @click="add_comment">提交</button>
    
       </div>
@@ -39,22 +40,83 @@
 <script>
 export default {
   props: ['toCommentData'],
+  data(){
+    return{
+      bloglistid:0,
+      author:'',
+      content:'',
+      parent:0
+    }
+  },
+  data(){
+    return {
+      show_reply_input:false
+    }
+  },
   methods: {
     add_comment: function (event) {
-      console.log(this.$ajax)
+      if(!window.localStorage.user){
+        this.$confirm('评论需要先登录，是否登录?','提示',{
+          confirmButtonText: '确认',
+          cancelButtonText: '取消',
+          type: 'info'
+        }).then(()=>{
+          this.$router.push({name: 'Regist'})
+        }).catch((()=>{}))
+      }
+      let add_comment = document.querySelector('div.comment_box textarea[name=add_comment]');
+      console.log(add_comment.value)
+      this.content = add_comment.value;
+      this.bloglistid = document.querySelector('div.comment_box').getAttribute('data_id')
+
+      this.$emit('add_comment', { bloglistid: this.bloglistid, author:'', conetent: this.content, parent: this.parent} )
+     
     },
-    add_reply: function (event) {
+    add_reply: function (data) {
+      if(!window.localStorage.user){
+        this.$router.push({name: 'Regist'})
+      }
+      
+      this.bloglistid = document.querySelector('div.comment_box').getAttribute('data_id')
+   
+      this.$emit('add_reply', { bloglistid: this.bloglistid, author:'', conetent: data.value, parent: this.parent} )
+    },
+    open_reply: function (event){
+      if(!window.localStorage.user){
+        this.$confirm('评论需要先登录，是否登录?','提示',{
+          confirmButtonText: '确认',
+          cancelButtonText: '取消',
+          type: 'info'
+        }).then(()=>{
+          this.$router.push({name: 'Regist'})
+        }).catch((()=>{}))
+      }
+
       let ele = event.target;
-      console.log(ele) 
       let id = ele.getAttribute('name');
-      console.log(id)
-      this.$emit('add_reply',)
+      this.parent = id;
+      
+      this.$prompt('虾说什么……','：）',{
+        confirmButtonText: '回复',
+        cancelButtonText: '取消',
+        inputType: 'textarea',
+        inputValidator: function(value){if(value==''){return false}else{return true}},
+        inputErrorMessage: '别空着啊'
+      }).then((value)=>{
+        console.log(value.value)
+        
+        this.add_reply(value)
+      }).catch(()=>{})
+
     }
   }
 }
 </script>
 
 <style>
+  .reply_input{
+    position: absolute;
+  }
   .add_comment > textarea{
     width: 100%;
     min-height: 100px;

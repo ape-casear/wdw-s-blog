@@ -12,8 +12,7 @@
             <div class="blog">
                 <span style="margin:0px;"><i class="el-icon-view"></i></span>
                 <span style="color:rgb(83, 20, 20); font-size:18px">{{blog.browse_count}}</span>
-                <span><a class="bloghref" href="javascript:void(0)" @click="clickBlog" :name="blog.id+'::'+blog.browse_count+'::'+blog.pub_date
-                    +'::'+blog.like+'::'+blog.author" >{{blog.title}}</a></span>
+                <span><a class="bloghref" href="javascript:void(0)" @click="clickBlog" :name="JSON.stringify(blog)" >{{blog.title}}</a></span>
                 <span style="color:rgb(60, 20, 20); font-weight:400;" class="right">{{blog.author}}</span>
                 <span class="right">{{blog.pub_date}}</span>
                 <span class="right">{{blog.like}}</span>
@@ -41,8 +40,9 @@ export default {
   methods: {
        clickBlog: function (event) {
            let blog = event.target;
-          
-           this.$router.push({name:'Blog', query: {id: blog.getAttribute('name')}})
+           let data = blog.getAttribute('name');
+           console.log(data)
+           this.$router.push({name:'Blog', params: {json_str_data: data} })
        },
        sortclick: function (event) {
            let sorttype = event.target.innerHTML;
