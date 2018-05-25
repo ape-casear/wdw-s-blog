@@ -14,7 +14,7 @@
                 <span style="color:rgb(83, 20, 20); font-size:18px">{{blog.browse_count}}</span>
                 <span><a class="bloghref" href="javascript:void(0)" @click="clickBlog" :name="JSON.stringify(blog)" >{{blog.title}}</a></span>
                 <span style="color:rgb(60, 20, 20); font-weight:400;" class="right">{{blog.author}}</span>
-                <span class="right">{{blog.pub_date}}</span>
+                <span class="right">{{blog.pub_datetime}}</span>
                 <span class="right">{{blog.like}}</span>
             </div>
         </div>
@@ -49,10 +49,10 @@ export default {
            if(sorttype == '时间'){
                console.log(this.$route.params)
            
-               this.$route.params.sorttype = 'time';
+               this.$route.params.sort_type = 'time';
          
            }else if(sorttype == '热度'){
-               this.$route.params.sorttype = 'hot';
+               this.$route.params.sort_type = 'browse_count';
            }
             let query = this.$route.params;
             this.$router.push({name:'BlogList', query: query, params: query})

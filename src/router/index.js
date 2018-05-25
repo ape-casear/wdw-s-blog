@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Regist from '@/components/Regist'
+/* import Regist from '@/components/Regist'
 import login from '@/components/login'
 import Write from '@/components/write'
 import FirstRouter from '@/components/FirstRouter'
@@ -9,6 +9,8 @@ import MarkDown from '@/components/MarkDown'
 import BlogList from '@/components/BlogList'
 import Mineclear from '@/components/Mineclear'
 import Snake from '@/components/Snake'
+import SVG01 from '@/components/SVG01'
+import zhihu from '@/components/zhihu' */
 
 
 Vue.use(Router)
@@ -18,21 +20,31 @@ export default new Router({
     {
       path: '/wdw',
       name: 'FirstRouter',
-      component: FirstRouter
+      component: resolve => require(['@/components/FirstRouter'], resolve)
+    },
+    {
+      path: '/zhihu',
+      name: 'zhihu',
+      component: resolve => require(['@/components/zhihu'], resolve)
+    },
+    {
+      path: '/svg01',
+      name: 'SVG01',
+      component: resolve => require(['@/components/SVG01'], resolve)
     },
     {
       path: '/regist',
       name: 'Regist',
-      component: Regist
+      component: resolve => require(['@/components/Regist'], resolve)
     },
     {
       path: '/login',
       name: 'Login',
-      component: login
+      component: resolve => require(['@/components/login'], resolve)
     },
     {
       path: '/',
-      redirect: '/regist'
+      redirect: '/svg01'
     },
     {
       path: '/restart_snake',
@@ -41,32 +53,32 @@ export default new Router({
     {
       path: '/userInfo',
       name: 'UserInfo',
-      component: UserInfo
+      component: resolve => require(['@/components/UserInfo'], resolve)
     },
     {
       path: '/blog',
       name: 'Blog',
-      component: MarkDown
+      component: resolve => require(['@/components/MarkDown'], resolve)
     },
     {
       path: '/bloglist',
       name: 'BlogList',
-      component: BlogList
+      component: resolve => require(['@/components/BlogList'], resolve)
     },
     {
       path: '/snake',
       name: 'Snake',
-      component: Snake
+      component: resolve => require(['@/components/Snake'], resolve)
     },
     {
       path: '/mineclear',
       name: 'Mineclear',
-      component: Mineclear
+      component: resolve => require(['@/components/Mineclear'], resolve)
     },
     {
       path: '/write',
       name: 'Write',
-      component: Write
+      component: resolve => require(['@/components/write'], resolve)
     },
 
   ]

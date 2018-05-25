@@ -39,7 +39,7 @@ export default {
 </script>
 
 <style>
-h1, h2 {
+#login h1  h2 {
   padding:20px;
   font-weight: normal;
 }

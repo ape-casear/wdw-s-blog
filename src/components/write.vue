@@ -2,7 +2,7 @@
     <div class="write">
         <h1>好好学习，天天向上</h1>
         <div>
-            <form method="post" action="http://localhost/blog" enctype="multipart/form-data">
+            <form method="post" action="http://www.weidongwei.com:88/blog" enctype="multipart/form-data">
                 <center>
                     <table>
                         <tr>
@@ -15,7 +15,7 @@
                             <td><span>标题：</span></td><td><input type="text" value="" name="title"/></td>
                         </tr>
                         <tr>
-                            <td><span>内容：</span></td><td><input type="file" name="content" multiple/></td>
+                            <td><span>内容：</span></td><td><input type="file" name="blog" multiple/></td>
                         </tr>
                         <tr>
                             <td><span>提交：</span></td><td><input type="submit" value="submit" /></td>

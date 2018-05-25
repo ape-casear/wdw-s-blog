@@ -4,8 +4,8 @@
       <div v-for="(comment,index) in toCommentData.comments" :key="comment.id">
         <div :name="comment.id">
           <span class="floor" >#{{index+1}}楼</span>
-          <span class="comment_datatime">{{comment.comment_datatime}}</span>
-          <span  >{{comment.user}}</span>
+          <span class="comment_datatime">{{comment.comment_datetime}}</span>
+          <span  >{{comment.author}}</span>
           <span class="reply" @click="open_reply" :name="comment.id">回复</span>
          
         </div>
@@ -17,7 +17,7 @@
             <div>
               <span class="sub_floor" >{{sub_index+1}}层</span>
               <span class="sub_comment_datatime">{{sub_comment.comment_datatime}}</span>
-              <span  style="font-size:14px;">{{sub_comment.user}}</span>
+              <span  style="font-size:14px;">{{sub_comment.author}}</span>
             </div>
             <div class="sub_comment_main">
               <p>{{sub_comment.comment}}</p>
@@ -63,14 +63,16 @@ export default {
         }).then(()=>{
           this.$router.push({name: 'Regist'})
         }).catch((()=>{}))
-      }
-      let add_comment = document.querySelector('div.comment_box textarea[name=add_comment]');
-      console.log(add_comment.value)
-      this.content = add_comment.value;
-      this.bloglistid = document.querySelector('div.comment_box').getAttribute('data_id')
+      }else{
 
-      this.$emit('add_comment', { bloglistid: this.bloglistid, author:'', conetent: this.content, parent: this.parent} )
-     
+        let add_comment = document.querySelector('div.comment_box textarea[name=add_comment]');
+        console.log(add_comment.value)
+        this.content = add_comment.value;
+        this.bloglistid = document.querySelector('div.comment_box').getAttribute('data_id')
+  
+        this.$emit('add_comment', { bloglistid: this.bloglistid, author:'', comment: this.content, parent: this.parent} )
+        add_comment.value = '';
+      }
     },
     add_reply: function (data) {
       if(!window.localStorage.user){
@@ -79,7 +81,7 @@ export default {
       
       this.bloglistid = document.querySelector('div.comment_box').getAttribute('data_id')
    
-      this.$emit('add_reply', { bloglistid: this.bloglistid, author:'', conetent: data.value, parent: this.parent} )
+      this.$emit('add_reply', { bloglistid: this.bloglistid, author:'', comment: data.value, parent: this.parent} )
     },
     open_reply: function (event){
       if(!window.localStorage.user){
@@ -90,23 +92,25 @@ export default {
         }).then(()=>{
           this.$router.push({name: 'Regist'})
         }).catch((()=>{}))
+      }else{
+
+        let ele = event.target;
+        let id = ele.getAttribute('name');
+        this.parent = id;
+        
+        this.$prompt('虾说什么……','：）',{
+          confirmButtonText: '回复',
+          cancelButtonText: '取消',
+          inputType: 'textarea',
+          inputValidator: function(value){if(value==''){return false}else{return true}},
+          inputErrorMessage: '别空着啊'
+        }).then((value)=>{
+          console.log(value.value)
+          
+          this.add_reply(value)
+        }).catch(()=>{})
       }
 
-      let ele = event.target;
-      let id = ele.getAttribute('name');
-      this.parent = id;
-      
-      this.$prompt('虾说什么……','：）',{
-        confirmButtonText: '回复',
-        cancelButtonText: '取消',
-        inputType: 'textarea',
-        inputValidator: function(value){if(value==''){return false}else{return true}},
-        inputErrorMessage: '别空着啊'
-      }).then((value)=>{
-        console.log(value.value)
-        
-        this.add_reply(value)
-      }).catch(()=>{})
 
     }
   }

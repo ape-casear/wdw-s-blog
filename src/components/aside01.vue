@@ -7,7 +7,7 @@
           <span><a href="http://www.tju.edu.cn/" target="blank"><i class="el-icon-location-outline"></i>天津大学</a></span>
           <transition name="el-zoom-in-center">
             <div v-show="showQRcode" class="transition-box">
-                <img id="QRcode" src="../assets/head.png" :class="{showQRcode: showQRcode, notshowQRcode: !showQRcode}" />
+                <img id="QRcode" src="../assets/wechat_wdw.png" :class="{showQRcode: showQRcode, notshowQRcode: !showQRcode}" />
             </div>
           </transition>
       </div>
@@ -15,15 +15,15 @@
       <div id="aside01_bottom">
           <dl>
             <dt><i class="el-icon-document"></i>blog</dt>
-            <dd>{{toAside01Data.blogs}}</dd>
+            <dd>{{toAside01Data.blog_count}}</dd>
           </dl>
           <dl>
             <dt><i class="el-icon-star-on"></i>访问</dt>
-            <dd>{{toAside01Data.visits}}</dd>
+            <dd>{{toAside01Data.visit_count}}</dd>
           </dl>
           <dl>
             <dt><i class="el-icon-edit-outline"></i>评论</dt>
-            <dd>{{toAside01Data.comments}}</dd>
+            <dd>{{toAside01Data.total_comment}}</dd>
           </dl>
       </div>
   </div>

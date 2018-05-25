@@ -28,7 +28,8 @@
         </ul>
       </span>
     </div>
-    <header>
+    <header style=" background:url(./static/img/acfunBanner.jpg) no-repeat;">
+    <!-- <header style=" background:url('./assets/acfunBanner.jpg') no-repeat;"> -->
       <a href="javascript:void(0)"></a>
     </header>
     <div class="container">
@@ -67,6 +68,7 @@ import router from "./router/index";
 import bus from "./bus.js";
 import comment from "./components/Comment";
 import jsSHA from "./lib/jsSHA/src/sha.js";
+import qs from 'querystring';
 export default {
   data () {
     return{
@@ -74,13 +76,14 @@ export default {
       user:{name:'',age:0},
       username:'',
       toViewData:{},
-      toConponentData1:{ main_lis: [{id:0,name:'blog'},{id:1,name:'bloglist'}],title: '博客'},
+      toConponentData1:{ main_lis: [{id:0,name:'bloglist'}],title: '博客'},
       toConponentData2:{ main_lis: [{id:0,name:'Snake'},{id:1,name:'Mineclear'}],title: '游戏'},
       toConponentData3:{ main_lis: [{id:0,name:'zhihu'},{id:1,name:'A'}],title: '爬虫'},
       showComment: false,
       toCommentData: {},
       toAside01Data: {},
-      toAside02Data: {}
+      toAside02Data: {},
+      toZhiHuDatas: []
     
     }
   },
@@ -96,12 +99,33 @@ export default {
     add_reply: function(data){
       data.author = this.username;
       console.log(data)
-      //this.$ajax.post('localhost/comment',{ bloglistid, content, author, parent })
+      data.comment_datatime = new Date().toLocaleString();
+      
+      //this.$ajax.post('http://localhost:88/comment',{ bloglistid, content, author, parent })
+      for(let i=0; i< this.toCommentData.comments.length; i++){
+        console.log(this.toCommentData.comments[i])
+        if(this.toCommentData.comments[i].id == data.parent){
+          this.toCommentData.comments[i].sub_comment.push(data)
+          console.log('push')
+        }
+      }
     },
     add_comment: function(data){
       data.author = this.username;
-      console.log(data)
-      //this.$ajax.post('localhost/comment',{ bloglistid, content, author, parent:0 })
+      
+      data.comment_datetime = new Date().toLocaleString();
+      
+      this.$ajax.post('http://www.weidongwei.com:88/comment/addcomment', 
+             { bloglistid: data.bloglistid, comment: data.comment, author: data.author, parent: 0 },
+             {
+                withCredentials: true,
+                transformRequest: [function (data) {
+                  data = qs.stringify(data);
+                  return data;
+                }],     
+              }
+      ).then(res=>{console.log(res)}).catch(console.error.bind(console))
+      this.toCommentData.comments.push(data)
     },
     userRegist: function (user) {
       console.log('userRegist 执行')
@@ -111,19 +135,23 @@ export default {
       user.password = shaObj.getHash("HEX");
       user.author = user.name;
       console.log(user)
-      /*
-      let result = this.$ajax.post('localhost/user',{user})
-      if(!result.code==0){
-        this.message.error("注册失败")
-        return;
-      }
-      */
-      sessionStorage.user = user;
-      localStorage.user = JSON.stringify(user);
-      this.user = user;
-      console.log(this.username)
       
-      router.push({name:'FirstRouter'})
+      this.$ajax.post('http://www.weidongwei.com:88/user', user ).then(res=>{
+        if(res.data.code != 0){
+          this.$message.error("注册失败")
+          return;
+        }else{
+
+          sessionStorage.user = user;
+          localStorage.user = JSON.stringify(user);
+          this.user = user;
+          console.log(this.username)
+          
+          router.push({name:'FirstRouter'})
+        }
+
+      })
+      
     },
     userLogin: function(user){
       console.log('userlogin 执行')
@@ -132,23 +160,30 @@ export default {
       this.username = user.name;
       user.password = shaObj.getHash("HEX");
       user.author = user.name;
-      console.log(user)
-      /*
-      let result = this.$ajax.post('localhost/user',{user})
-      if(!result.code==0){
-        this.message.error("登录失败")
-        return;
-      }
-      */
-      sessionStorage.user = user;
-      localStorage.user = JSON.stringify(user);
-      this.user = user;
-      router.push({name:'FirstRouter'})
+      
+      
+      this.$ajax.post('http://www.weidongwei.com:88/user/login',user).then(res=>{
+
+        if(res.data.code == 0){
+          this.$message({
+            message: '登录成功',
+            type: 'success'
+          })
+          sessionStorage.user = user;
+          localStorage.user = JSON.stringify(user);
+          this.user = user;
+          router.push({name:'FirstRouter'})
+          
+        }else{
+          this.$message.error('登录失败')
+        }
+        
+      })
     },
     logoclick: function() {
       
      console.log(this.toConponentData2)
-     router.push({name:'Regist'})
+     router.push({name:'SVG01'})
       
     },
     closeOther: function(event){
@@ -176,7 +211,7 @@ export default {
       }
     }
   },
-  mounted: async function(){
+  mounted:  function(){
     //console.log(this.$options.methods.userLogin)
     console.log('mounted 执行 初始化index页面')
 
@@ -193,14 +228,13 @@ export default {
     }
     this.username = this.user.name;
 
-    //注册登录事件
-    bus.$on('userRegist',this.$options.methods.userRegist)
-
+    this.toAside02Data = {types:[{name:'nodejs', count: 0},{name: 'java', count: 0},{ name: '闲聊', count: 0}]}
     //初始化 aside01
-    /* let result_aside01 = await this.$ajax.get('localhost/web_info')
-    this.toAside01Data = result_aside01.data; */
-    this.toAside01Data = {blogs: 99, comments: 999999, visits: 99};
-    this.toAside02Data = {types:[{name:'nodejs', count: 12},{name: 'java', count: 21},{ name: '闲聊', count: 5}]}
+    this.$ajax.get('http://www.weidongwei.com:88/webinfo').then(res=>this.toAside01Data = res.data).catch(console.error.bind(console))
+    //this.$ajax.get('http://www.weidongwei.com:88/webinfo').then(res=>this.toAside01Data = res).catch(console.error.bind(console))
+    //this.toAside01Data = result_aside01.data; 
+    //this.toAside01Data = result_aside01;
+  
   },
   watch: {
     $route: async function (newVal,val) {
@@ -210,36 +244,39 @@ export default {
       if(newVal.name===""){
         
       }else if(newVal.name==='BlogList'){
-        let url = 'http://localhost:8080/bloglist?';
+        let url = 'http://www.weidongwei.com:88/bloglist/'+ 0 +'?';
         if( newVal.query.type){
           url += 'type=' + newVal.query.type + "&";
         }
-        if(newVal.query.sorttype){
-          url += 'sorttype=' + newVal.query.sorttype + "&";
+        if(newVal.query.sort_type){
+          url += 'sort_type=' + newVal.query.sort_type + "&";
         }
         console.log(url)
         console.log(this.$route.params)
-        //let res = await this.$ajax.get('bloglist接口');
+        let res = await this.$ajax.get(url);
         //let res = this.$ajax.get('www.baidu.com');
-        this.toViewData = [{id:0,title:'blog1',author:'wdw',pub_date:'2018-05-04',like:21,browse_count:2000},
-              {id:1,title:'blog2',author:'wdw',pub_date:'2018-05-04',like:21.8,browse_count:2000},
-              {id:2,title:'blog3',author:'wdw',pub_date:'2018-05-04',like:21,browse_count:2000}];
+        this.toViewData = res.data.data.bloglist;
         
   
       }else if(newVal.name==='Blog'){
         //查询blog表 表结构为 {id,bloglistid,content}  从newVAL中得到blog的数据，并查表得到内容content,然后将blog数据通过toViewData传输过去
         console.log('-----')
         
-       /*  let res = await request.get('blog接口',{bloglistid: newVal.query.id});
-            let comments = this.$ajax.get('comment接口',{bloglistid: newVal.query.id)*/
         let bloglist_data = JSON.parse(newVal.params.json_str_data)
-        this.toCommentData = {bloglistid: bloglist_data.id,
-                              comments:[{id:1, user: '独孤求败', comment: '丢你老谋', comment_datatime: '2018-05-09 12:32:11', sub_comment: 
-                                          [{id:5,user: '令狐冲', comment: '日月神教，一统中原', comment_datatime: '2018-05-09 12:32:11'},
-                                          {id:4,user: '任盈盈', comment: '日月神教，一统中原', comment_datatime: '2018-05-09 12:32:11'}]},
-                              {id:2,user: '西门吹雪', comment: '丢你老谋', comment_datatime: '2018-05-09 12:32:11' },
-                              {id:3,user: '东方不败', comment: '丢你老谋', comment_datatime: '2018-05-09 12:32:11'}]};
+        this.$ajax.get('http://www.weidongwei.com:88/blog?bloglistid=' + bloglist_data.id ).then(res=>{
+          bloglist_data.content = res.data.data.blog;
+          console.log(res.data.data)
+          this.toViewData = bloglist_data;
+          
+        })
+        this.$ajax.get('http://www.weidongwei.com:88/comment/'+ bloglist_data.id ).then(res=>{
+          this.toCommentData = {comments:res.data.data,  bloglistid: bloglist_data.id};
+
+        });
         this.showComment = true;
+      }else if(newVal.name === 'zhihu'){
+        this.$ajax.get('http://www.weidongwei.com:88/zhihu').then(res=>this.toViewData = res.data)
+        
       }
       
     }
@@ -301,7 +338,7 @@ div header aside{
   
 }
 header{
-  background:url(assets/acfunBanner.jpg) no-repeat;
+ 
  /*  background-size: 1920px auto; */
   width:100%;height:70px;
   background-size: 100%;
