@@ -53,6 +53,9 @@ export default {
       show_reply_input:false
     }
   },
+  mounted:function(){
+  
+  },
   methods: {
     add_comment: function (event) {
       if(!window.localStorage.user){

@@ -1057,8 +1057,6 @@ export default {
   fill: #ddd162;
 }
 
-body {max-width: 1440px;}
-
 #needles {
   -webkit-animation: rotate 5s linear infinite;
           animation: rotate 5s linear infinite;

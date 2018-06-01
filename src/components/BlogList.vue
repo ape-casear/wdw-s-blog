@@ -26,36 +26,34 @@ export default {
   props:['toViewData'],
   data () {
       return {
-          //bloglist:[],
-          msg:'',
-          
+ 
       }
   },
   watch: {
   
   },
-  mounted:function (){
-     
+  created:function (){
+     this.$nextTick((()=>{
+         this.$emit('api_from_child', {name: this.$route.name, query: this.$route.query})
+     }))
   },
   methods: {
        clickBlog: function (event) {
+           this.$emit('loading')
            let blog = event.target;
            let data = blog.getAttribute('name');
            console.log(data)
-           this.$router.push({name:'Blog', params: {json_str_data: data} })
+           this.$router.push({name:'Blog', params: {json_str_data: data}, query: {json_str_data: data} })
        },
        sortclick: function (event) {
            let sorttype = event.target.innerHTML;
            if(sorttype == '时间'){
                console.log(this.$route.params)
-           
-               this.$route.params.sort_type = 'time';
-         
+               this.$route.query.sort_type = 'time';
            }else if(sorttype == '热度'){
-               this.$route.params.sort_type = 'browse_count';
+               this.$route.query.sort_type = 'browse_count';
            }
-            let query = this.$route.params;
-            this.$router.push({name:'BlogList', query: query, params: query})
+            this.$emit('api_from_child',{name: this.$route.name, query: this.$route.query})
        }
   }
 }

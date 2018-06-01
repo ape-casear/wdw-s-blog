@@ -28,7 +28,7 @@
         </ul>
       </span>
     </div>
-    <header style=" background:url(./static/img/acfunBanner.jpg) no-repeat;">
+    <header style=" background:url(./static/img/acfunBanner.jpg) no-repeat; background-size:100%; ">
     <!-- <header style=" background:url('./assets/acfunBanner.jpg') no-repeat;"> -->
       <a href="javascript:void(0)"></a>
     </header>
@@ -45,8 +45,8 @@
         </div>
       </aside>
       <main >
-        <div id="router-view" >
-          <router-view :toViewData="toViewData"  @login='userLogin'  @userRegist="userRegist"/>
+        <div id="router-view" v-loading="loading">
+          <router-view  :toViewData="toViewData"  @login='userLogin'  @userRegist="userRegist"  @api_from_child="request" @loading="loading=true"/>
         </div>
       </main>
       <div id="comment" v-if="showComment" >
@@ -83,8 +83,8 @@ export default {
       toCommentData: {},
       toAside01Data: {},
       toAside02Data: {},
-      toZhiHuDatas: []
-    
+      toZhiHuDatas: [],
+      loading: false
     }
   },
   name: 'App',
@@ -118,7 +118,6 @@ export default {
       this.$ajax.post('http://www.weidongwei.com:88/comment/addcomment', 
              { bloglistid: data.bloglistid, comment: data.comment, author: data.author, parent: 0 },
              {
-                withCredentials: true,
                 transformRequest: [function (data) {
                   data = qs.stringify(data);
                   return data;
@@ -209,6 +208,73 @@ export default {
       for(let key in this.$refs){
            this.$refs[key].isShow = false;
       }
+    },
+    promise_get: function(url){
+      return new Promise((resolve, reject)=>{
+        this.$ajax.get(url).then(res=>resolve(res)).catch(e=>reject(e))
+      })
+    },
+    promise_post: function(url,data){
+      return new Promise((resolve, reject)=>{
+        this.$ajax.post(url, data).then(res=>resolve(res)).catch(e=>reject(e))
+      })
+    },
+    request: async function(newVal){
+      console.log('api launch')
+      this.loading = true;
+      this.showComment = false;
+      if(newVal.name===""){
+        
+      }else if(newVal.name==='BlogList'){
+        let url = 'http://www.weidongwei.com:88/bloglist/'+ 0 +'?';
+        if( newVal.query.type){
+          url += 'type=' + newVal.query.type + "&";
+        }
+        if(newVal.query.sort_type){
+          url += 'sort_type=' + newVal.query.sort_type + "&";
+        }
+        console.log(url)
+        //console.log(this.$route.params)
+        let res = await this.$ajax.get(url);
+        //let res = this.$ajax.get('www.baidu.com');
+        this.toViewData = res.data.data.bloglist;
+        this.loading = false;
+  
+      }else if(newVal.name==='Blog'){
+        //查询blog表 表结构为 {id,bloglistid,content}  从newVAL中得到blog的数据，并查表得到内容content,然后将blog数据通过toViewData传输过去
+        console.log('-----')
+        
+        let json_str_data = newVal.query.json_str_data;
+        this.$ajax.get('http://www.weidongwei.com:88/blog?bloglistid=' + json_str_data.id ).then(res=>{
+          json_str_data.content = res.data.data.blog;
+          console.log(res.data.data)
+          this.toViewData = json_str_data;
+          this.loading = false;
+        })
+        this.$ajax.get('http://www.weidongwei.com:88/comment/'+ json_str_data.id ).then(res=>{
+          this.toCommentData = {comments: res.data.data,  bloglistid: json_str_data.id};
+
+        });
+        this.showComment = true;
+      }else if(newVal.name === 'zhihu'){
+        this.$ajax.get('http://www.weidongwei.com:88/zhihu').then(async (res)=>{
+          let answers = res.data;
+          let comments = await Promise.all(answers.map( (answer)=>{
+            let res =   this.$ajax.get('http://www.weidongwei.com:88/zhihu/comment/'+ answer.id);
+            if(res instanceof Promise){
+              return res
+            }
+          }))
+          console.log(comments)
+          for(let i =0; i< answers.length; i++){
+            answers[i].comments = comments[i].data;
+            console.log(answers[i].comments)
+          }
+          this.toViewData = answers;
+          this.loading = false;
+        })
+        
+      }
     }
   },
   mounted:  function(){
@@ -236,52 +302,16 @@ export default {
     //this.toAside01Data = result_aside01;
   
   },
-  watch: {
-    $route: async function (newVal,val) {
-      console.log(newVal)
-      console.log(val)
-      this.showComment = false;
-      if(newVal.name===""){
-        
-      }else if(newVal.name==='BlogList'){
-        let url = 'http://www.weidongwei.com:88/bloglist/'+ 0 +'?';
-        if( newVal.query.type){
-          url += 'type=' + newVal.query.type + "&";
-        }
-        if(newVal.query.sort_type){
-          url += 'sort_type=' + newVal.query.sort_type + "&";
-        }
-        console.log(url)
-        console.log(this.$route.params)
-        let res = await this.$ajax.get(url);
-        //let res = this.$ajax.get('www.baidu.com');
-        this.toViewData = res.data.data.bloglist;
-        
-  
-      }else if(newVal.name==='Blog'){
-        //查询blog表 表结构为 {id,bloglistid,content}  从newVAL中得到blog的数据，并查表得到内容content,然后将blog数据通过toViewData传输过去
-        console.log('-----')
-        
-        let bloglist_data = JSON.parse(newVal.params.json_str_data)
-        this.$ajax.get('http://www.weidongwei.com:88/blog?bloglistid=' + bloglist_data.id ).then(res=>{
-          bloglist_data.content = res.data.data.blog;
-          console.log(res.data.data)
-          this.toViewData = bloglist_data;
-          
-        })
-        this.$ajax.get('http://www.weidongwei.com:88/comment/'+ bloglist_data.id ).then(res=>{
-          this.toCommentData = {comments:res.data.data,  bloglistid: bloglist_data.id};
-
-        });
-        this.showComment = true;
-      }else if(newVal.name === 'zhihu'){
-        this.$ajax.get('http://www.weidongwei.com:88/zhihu').then(res=>this.toViewData = res.data)
-        
+  updated:function(){
+    console.log('app updated')
+  },
+  watch:{
+    $route:function(newVal, oldVal){
+      if(newVal.name != 'Blog'){
+        this.showComment = false;
       }
-      
     }
   }
- 
 }
 </script>
 
@@ -311,6 +341,9 @@ div header aside{
 }
 .container{
   margin-bottom: 70px;
+  max-width: 1440px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .main_logo{
   width:100px;
@@ -340,7 +373,7 @@ div header aside{
 header{
  
  /*  background-size: 1920px auto; */
-  width:100%;height:70px;
+  width:100%;height: 100px;
   background-size: 100%;
 }
 footer{
