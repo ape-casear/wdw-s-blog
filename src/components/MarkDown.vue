@@ -16,7 +16,7 @@
        <div style="height:1px; width:100%; margin-top:10px; margin-bottom=20px; border-top:1px #aaa solid"></div>
       <vue-markdown :source="toViewData.content"></vue-markdown>
 
-      <div class="modify" v-if="JSON.parse(_user) && JSON.parse(_user).name =='wdw'">
+      <div class="modify" v-if="JSON.parse(_user).name =='wdw'">
         <span  class="sort" style="color:rgb(202, 197, 169);cursor:pointer;"  @click="open_modify"><i class="el-icon-edit"  >modify</i></span>
         <textarea :class="{'textarea': true, 'hidden': hide}"  v-model="bind_content" v-if="hide"/>
       </div>
@@ -65,6 +65,9 @@ export default {
   },
   beforeMount: function(){
     this._user = window.localStorage.user;
+    if(!this._user){
+      this._user = '{}';
+    }
   }
 }
 </script>

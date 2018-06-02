@@ -80,7 +80,7 @@ export default {
             var _youdie = this.youdie;
             //给table（地图）初始化
 
-                var table=$('#table')[0];
+                var table=document.querySelector('#table')
                 console.log(table.childNodes.length)
 
                 for(let i_1=0;i_1<size;i_1++){
@@ -182,7 +182,7 @@ export default {
                 var snakelist= this.snakebody;
                 
                 //触发按键
-                $(document).keypress(function(e){
+                document.onkeypress=function(e){
                     //设置方向			
                     setVector(e);
                     //如果是第一次以后按键事件，就直接return，不再开启新的线程执行setInterval了，
@@ -190,8 +190,9 @@ export default {
                         return;
                     }
                     //若是点击了难度选择，就根据选择设置难度
-                    var level=$('.level:checked').val();
-                    if(level!=null&&level!=undefined){speed=level;}
+                    var level = document.querySelector('.level:checked');
+                    
+                    if(level){speed=level.getAttribute('value');}
                     //蛇的移动
                     var inter=setInterval(function interval(){   
                         
@@ -295,7 +296,7 @@ export default {
                     },speed);
                     presscount=true;
                     putBall();
-                });
+                };
        }
   },
   mounted: function () {
