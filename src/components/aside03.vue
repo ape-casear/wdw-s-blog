@@ -10,11 +10,22 @@
 export default {
   data(){
     return{
-      urls: ['http://www.weidongwei.com:88/img/0201.jpg','http://www.weidongwei.com:88/img/0202.jpg','http://www.weidongwei.com:88/img/0203.jpg']
+      urls: ['http://www.weidongwei.com:88/img/expressImg/0{num}01.jpg',
+      'http://www.weidongwei.com:88/img/expressImg/0{num}02.jpg',
+      'http://www.weidongwei.com:88/img/expressImg/0{num}03.jpg',
+      'http://www.weidongwei.com:88/img/expressImg/0{num}04.jpg',
+      'http://www.weidongwei.com:88/img/expressImg/0{num}05.jpg',
+      'http://www.weidongwei.com:88/img/expressImg/0{num}06.jpg',
+      'http://www.weidongwei.com:88/img/expressImg/0{num}07.jpg',
+      'http://www.weidongwei.com:88/img/expressImg/0{num}08.jpg']
     }
   },
-  mounted: function(){
-
+  created: function(){
+    let num = (new Date()).getDate() % 5;
+    num += 1;
+    this.urls = this.urls.map(url=>{
+      return url.replace('{num}', num)
+    })
   }
 }
 </script>

@@ -91,7 +91,7 @@ export default {
     #aside01_bottom{
         display: flex;
         text-align: center;
-        justify-content:center;
+        justify-content: space-between;
         /* align-items:center; */
     }
     #aside01_bottom > dl{ 
