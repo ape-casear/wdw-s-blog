@@ -46,7 +46,8 @@
       </aside>
       <main >
         <div id="router-view" v-loading="loading">
-          <router-view  :toViewData="toViewData"  @login='userLogin'  @userRegist="userRegist"  @api_from_child="request" @loading="loading=true"/>
+          <router-view  :toViewData="toViewData"  @login='userLogin'  @userRegist="userRegist"  @api_from_child="request" 
+            @loading="loading=true" @modify="modifyBlog" />
         </div>
       </main>
       <div id="comment" v-if="showComment" >
@@ -218,6 +219,18 @@ export default {
       return new Promise((resolve, reject)=>{
         this.$ajax.post(url, data).then(res=>resolve(res)).catch(e=>reject(e))
       })
+    },
+    modifyBlog: async function(data){
+      let url = `http://www.weidongwei.com:88/blog/modify`;
+      let res = await this.promise_post( url, data );
+      if(res.data.code == 0){
+        this.$message({
+            message: '修改成功',
+            type: 'success'
+          })
+      }else{
+        this.$message.error('修改失败')
+      }
     },
     request: async function(newVal){
       console.log('api launch')
@@ -391,5 +404,8 @@ main, #comment{
   -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
   box-shadow:  0 5px 10px rgba(0, 0, 0, 0.2);
   margin-bottom: 10px;
+}
+p{
+  line-height: 30px;
 }
 </style>

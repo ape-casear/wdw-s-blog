@@ -7,8 +7,10 @@ import axios from 'axios'
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css'; //引入ui组件
 
+
 Vue.config.productionTip = false
 Vue.use(ElementUI)
+
 /* eslint-disable no-new */
 Vue.prototype.$ajax = axios;
 new Vue({

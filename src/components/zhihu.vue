@@ -40,10 +40,6 @@ export default {
 </script>
 
 <style>
-p{
-    text-indent:2em;
-    line-height: 2em;
-}
 .zhihu .comment{
     border:rgb(216, 216, 198) solid 1px;
     background-color: rgb(243, 238, 232);
