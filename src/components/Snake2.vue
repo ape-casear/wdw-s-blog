@@ -19,13 +19,13 @@
 </template>
 
 <script>
-import { running, wondering } from '../lib/snakeAI';
+const { run, wonder } = require('../lib/snakeAI');
 export default {
   data (){
       return {
-          imgs: {num:16*16, },
+          imgs: {num:1296, },
           started: false,
-          size: 16,
+          size: 36,
           youdie: {youdie: false},
           snakebody:[],
           snakelength: { length: 3},
@@ -58,7 +58,7 @@ export default {
        start(){
             this.started = true;
             let message = this.$message;
-            //console.log('snake mouted')
+            console.log('snake mouted')
             //蛇头
             const snakeHead={"hx":9,"hy":8,"vector":"NORTH","img":null,"length": this.snakelength};
             const ballposition = {x: 0, y: 0}
@@ -69,20 +69,21 @@ export default {
                 this.isSnakeBody=false;
                 this.isBall=false;
                 this.img=null;
+                this.check = false;
             }
             //地图大小
-            const size=this.size;
+            const size=36;
 
             var presscount=false; //按键次数  用来使interval函数只执行一次
             var die=false;
             //默认速度
-            var speed=400;
+            var speed=150;
             var _rows = this.rows;
             var _youdie = this.youdie;
             //给table（地图）初始化
 
                 var table=document.querySelector('#table')
-                //console.log(table.childNodes.length)
+                console.log(table.childNodes.length)
 
                 for(let i_1=0;i_1<size;i_1++){
                     _rows[i_1]=new Array(size);
@@ -92,15 +93,15 @@ export default {
                         //每一个rows[][]就是一个小块 block
                         _rows[i_2][j_2]=new block(i_2,j_2);
                         //给每个block的附上img
-                        var tempImg = table.childNodes[i_2*16+j_2];
+                        var tempImg = table.childNodes[i_2*36+j_2];
                         _rows[i_2][j_2].img=tempImg;
                      
                 
                     }
                 }
                 
-                ////console.log(_rows[1][0].img.setAttribute('class','red'))
-                //console.log(_rows[1].length)
+                //console.log(_rows[1][0].img.setAttribute('class','red'))
+                console.log(_rows[1].length)
                 
                 //给蛇头上img
                 var headImg=document.createElement("img");
@@ -198,31 +199,21 @@ export default {
                     if(level){speed=level.getAttribute('value');}
                     //蛇的移动
                     var inter=setInterval(function interval(){   
-                        try{
-                            let start = {x: snakeHead.hx, y: snakeHead.hy};
-                            let end = {x: snakelist[0],y: snakelist[1]}
-                            let direction = running(_rows, start, ballposition)
-                            //console.log('一次头找球执行完毕', direction)
-                            //console.log('end', end)
-                            //console.log('ballposition', ballposition)
-                            let access = running(_rows, ballposition, end, true);
-                            if( direction && access){
-                                console.log('向球前进', direction)
-                                snakeHead.vector = direction;
+                        let start = {x: snakeHead.hx, y: snakeHead.hy};
+                        let end = {x: snakelist[0],y: snakelist[1]}
+                        let direction = run(_rows, start, ballposition)
+                        let access = run(_rows, ballposition, end);
+                        if( direction && access){
+                            snakeHead.vector = direction;
+                        }else{
+                            let seeTail = run(_rows, start, end);
+                            if(seeTail){
+                                snakeHead.vector = seeTail;
                             }else{
-                                let seeTail = running(_rows, start, end, true);
-                                if(seeTail){
-                                    console.log('向尾巴前进', seeTail)
-                                    snakeHead.vector = seeTail;
-                                }else{
-                                    snakeHead.vector = wondering(_rows, start, snakeHead.vector)
-                                    console.log('瞎逛', snakeHead.vector)
-                                }
+                                snakeHead.vector = wonder(_rows, start, snakeHead.vector)
                             }
-                        }catch(e){
-                            //console.log(e);
-                            clearInterval(inter)
                         }
+                        
                         if(snakeHead.vector=="NORTH"){
                             //撞墙判断
                             if(snakeHead.hx-1<0){
@@ -338,8 +329,8 @@ export default {
 
 <style>
     #table{
-		width:160px;
-		height:160px;
+		width:360px;
+		height:360px;
         background-color: #333;
 	    -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.6);
         box-shadow:  0 5px 10px rgba(0, 0, 0, 0.6);

@@ -53,6 +53,12 @@
       <div id="comment" v-if="showComment" >
         <div is="comment" :toCommentData="toCommentData" @add_reply="add_reply" @add_comment="add_comment"></div>
       </div>
+      <div class="tool-point" v-if="showToolPoint">
+        <div class="tool-point-box">
+          <div  ><a class="tool-point-item" @click = "goTop">回到顶部</a></div>
+          <div  ><a class="tool-point-item" href="#/bloglist">博客列表</a></div>
+        </div>
+      </div>
     </div>
     <!-- <footer>
       <div id="footer">123123</div>
@@ -85,7 +91,8 @@ export default {
       toAside01Data: {},
       toAside02Data: {},
       toZhiHuDatas: [],
-      loading: false
+      loading: false,
+      showToolPoint: false,
     }
   },
   name: 'App',
@@ -102,7 +109,7 @@ export default {
       console.log(data)
       data.comment_datatime = new Date().toLocaleString();
       
-      //this.$ajax.post('http://localhost:88/comment',{ bloglistid, content, author, parent })
+      this.$ajax.post('http://www.weidongwei.com:88/comment/addcomment', data)
       for(let i=0; i< this.toCommentData.comments.length; i++){
         console.log(this.toCommentData.comments[i])
         if(this.toCommentData.comments[i].id == data.parent){
@@ -186,6 +193,9 @@ export default {
      router.push({name:'SVG01'})
       
     },
+    goTop: function(){
+      document.scrollingElement.scrollTop = 0;
+    },
     closeOther: function(event){
       let type;
       if(event.title == '游戏'){
@@ -265,8 +275,23 @@ export default {
           this.loading = false;
         })
         this.$ajax.get('http://www.weidongwei.com:88/comment/'+ json_str_data.id ).then(res=>{
-          this.toCommentData = {comments: res.data.data,  bloglistid: json_str_data.id};
-
+          //this.toCommentData = {comments: res.data.data,  bloglistid: json_str_data.id};
+          let parents = [];
+          for(let ele of res.data.data){
+            if(ele.parent != 0){
+              for(let parent of parents){
+                if(parent.id == ele.parent){
+                  parent.sub_comment.push(ele)
+                }
+              }
+            }else{
+              ele.sub_comment = [];
+              parents.push(ele)
+            }
+          }
+          console.log(parents)
+          this.toCommentData = {comments: parents,  bloglistid: json_str_data.id};
+          this.showToolPoint = true;
         });
         this.showComment = true;
       }else if(newVal.name === 'zhihu'){
@@ -322,6 +347,7 @@ export default {
     $route:function(newVal, oldVal){
       if(newVal.name != 'Blog'){
         this.showComment = false;
+        this.showToolPoint = false;
       }
     }
   }
@@ -407,5 +433,27 @@ main, #comment{
 }
 p{
   line-height: 30px;
+}
+.tool-point{
+  position: fixed;
+  display: table;
+  top: 90%;
+  left: 75%;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color:  rgb(130, 166, 170);
+  align-items: center;
+}
+.tool-point-item{
+  color: white;
+  font-size: 10px;
+  opacity: 0.8;
+}
+.tool-point-box{
+  text-align: center;
+  vertical-align: middle;
+  margin:0 auto;
+  display: table-cell;
 }
 </style>

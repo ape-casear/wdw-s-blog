@@ -18,7 +18,7 @@
 
       <div class="modify" v-if="JSON.parse(_user).name =='wdw'">
         <span  class="sort" style="color:rgb(202, 197, 169);cursor:pointer;"  @click="open_modify"><i class="el-icon-edit"  >modify</i></span>
-        <span  class="sort" style="color:rgb(180, 179, 169);cursor:pointer; background-color:rgb(180, 179, 169)"  v-if="hide" @click="submit"><i class="el-icon-edit"  >submit</i></span>
+        <span  class="sort" style="color:rgb(180, 179, 169);cursor:pointer; background-color:rgb(200, 199, 189)"  v-if="hide" @click="submit"><i class="el-icon-edit"  >submit</i></span>
         <textarea :class="{'textarea': true, 'hidden': hide}"  v-model="bind_content" v-if="hide"/>
       </div>
     </div>

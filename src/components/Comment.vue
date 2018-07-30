@@ -5,7 +5,7 @@
         <div :name="comment.id">
           <span class="floor" >#{{index+1}}楼</span>
           <span class="comment_datatime">{{comment.comment_datetime}}</span>
-          <span  >{{comment.author}}</span>
+          <span  >{{comment.author}}:</span>
           <span class="reply" @click="open_reply" :name="comment.id">回复</span>
          
         </div>
@@ -16,8 +16,8 @@
           <div v-for="(sub_comment, sub_index) in comment.sub_comment" :key="sub_comment.id">
             <div>
               <span class="sub_floor" >{{sub_index+1}}层</span>
-              <span class="sub_comment_datatime">{{sub_comment.comment_datatime}}</span>
-              <span  style="font-size:14px;">{{sub_comment.author}}</span>
+              <span class="sub_comment_datatime">{{sub_comment.comment_datetime}}</span>
+              <span  style="font-size:14px;">{{sub_comment.author}}:</span>
             </div>
             <div class="sub_comment_main">
               <p>{{sub_comment.comment}}</p>
@@ -25,7 +25,7 @@
           </div>
         </div>
       </div>
- 
+      <!-- 回到文章列表、顶部 -->
       <div class="add_comment">
         <h3>添加评论</h3>
         <textarea class="textarea"  name="add_comment" placeholder="说些什么……" wrap="physical"/>
@@ -156,10 +156,12 @@ export default {
     margin-right: 10px;
   }
   .comment_main > p{
+    border-radius: 4px;
     margin: 10px;
+    background-color: rgb(253, 229, 229);
   }
   .sub_comment{
-    background-color: rgb(236, 235, 235);
+   
   }
   .sub_floor{
     margin-left: 50px;
@@ -174,9 +176,11 @@ export default {
     font-size: 14px;
   }
   .sub_comment_main > p{
- 
+    border-radius: 3px;
+    background-color:  rgb(255, 246, 246);
     font-size: 14px;
-    margin-left:   50px;
+    margin-left: 50px;
+    margin-right: 10px;
   }
   .comment_box{
     margin:10px;
