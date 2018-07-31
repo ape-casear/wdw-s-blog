@@ -56,8 +56,10 @@ export default {
           this.start();
        },
        start(){
+            let restBlock = [];
             this.started = true;
             let message = this.$message;
+            const lastTail = {x: 0, y: 0}
             //console.log('snake mouted')
             //蛇头
             const snakeHead={"hx":9,"hy":8,"vector":"NORTH","img":null,"length": this.snakelength};
@@ -91,6 +93,7 @@ export default {
                     for(let j_2=0;j_2<size;j_2++){
                         //每一个rows[][]就是一个小块 block
                         _rows[i_2][j_2]=new block(i_2,j_2);
+                        restBlock.push({x:i_2, y:j_2})
                         //给每个block的附上img
                         var tempImg = table.childNodes[i_2*16+j_2];
                         _rows[i_2][j_2].img=tempImg;
@@ -142,9 +145,11 @@ export default {
                 }
                 //放球
                 function putBall(){
-                    var bx=Math.floor(Math.random()*size);
-                    var by=Math.floor(Math.random()*size);
-                    if(_rows[bx][by].isSnakeBody==false){
+                    let index = Math.floor(Math.random()*restBlock.length)
+                    var bx = restBlock[index].x
+                    var by = restBlock[index].y
+                    console.log(restBlock.length)
+                    if(_rows[bx][by].isSnakeBody == false){
                         _rows[bx][by].isBall=true;
                         _rows[bx][by].img.setAttribute('class','red')
                         ballposition.x = bx;
@@ -162,19 +167,31 @@ export default {
                 }
                 //蛇身变回砖块
                 function backToBlock(x,y){
-                    _rows[x][y].img.setAttribute('class','black')
-                    _rows[x][y].isSnakeBody=false;
+                    try{
+                        _rows[x][y].img.setAttribute('class','black')
+                        _rows[x][y].isSnakeBody=false;
+                        lastTail.x = x;
+                        lastTail.y = y;
+                        restBlock.push({x, y})
+                    }catch(e){
+                        console.log(x,y)
+                    }
                 }
                 //检查有没有撞自己身上了
                 function dieCheck(xx,yy){
                     if(_rows[xx][yy].isSnakeBody==true){
+                        /* if(xx == snakelist[0] && yy == snakelist[1]){
+                            return false;
+                        } */
                         youDIE();
                         return true;
-                    }else{}
-                        return false;
+                    }
+                    return false;
                 }
                 //吃到球了
                 function checkBall(cx,cy){
+                    //restBlock.push({x:snakeHead.hx, Y:snakeHead.hy})
+                    restBlock.shift();
                     if(_rows[cx][cy].isBall==true){
                         snakeHead.length.length++;
                         _rows[cx][cy].isBall=false;
@@ -198,31 +215,68 @@ export default {
                     if(level){speed=level.getAttribute('value');}
                     //蛇的移动
                     var inter=setInterval(function interval(){   
+                       
                         try{
                             let start = {x: snakeHead.hx, y: snakeHead.hy};
                             let end = {x: snakelist[0],y: snakelist[1]}
-                            let direction = running(_rows, start, ballposition)
+                            let direction;
+                            if(snakeHead.length.length > 200){
+                                direction = running(_rows, start, ballposition, false, true)
+                            }else{
+                                direction = running(_rows, start, ballposition, false)
+                            }
                             //console.log('一次头找球执行完毕', direction)
                             //console.log('end', end)
                             //console.log('ballposition', ballposition)
                             let access = running(_rows, ballposition, end, true);
                             if( direction && access){
-                                console.log('向球前进', direction)
+                                console.log('向球前进-------OOO', direction)
                                 snakeHead.vector = direction;
                             }else{
-                                let seeTail = running(_rows, start, end, true);
-                                if(seeTail){
-                                    console.log('向尾巴前进', seeTail)
-                                    snakeHead.vector = seeTail;
+                                console.log(`向尾巴前进------->>>`)
+                                if(snakeHead.length.length > 100){
+                                    let wonder = wondering(_rows, {x: snakeHead.hx, y: snakeHead.hy}, snakeHead.vector);
+                                    console.log(wonder)
+                                    if(running(_rows, wonder.point, lastTail, false)){
+                                        snakeHead.vector = wonder.vector;
+                                    }else{
+                                        let seeTail = running(_rows, start, lastTail, false, ballposition);
+                                        if(seeTail){
+                                            snakeHead.vector = seeTail;
+                                        }else{
+                                            snakeHead.vector = wondering(_rows, start, snakeHead.vector).vector;
+                                            console.log('瞎逛', snakeHead.vector)
+                                        }
+                                    }
                                 }else{
-                                    snakeHead.vector = wondering(_rows, start, snakeHead.vector)
-                                    console.log('瞎逛', snakeHead.vector)
+                                    let seeTail = running(_rows, start, lastTail, false, ballposition);
+                                    if(seeTail){
+                                        snakeHead.vector = seeTail;
+                                    }else{
+                                        snakeHead.vector = wondering(_rows, start, snakeHead.vector).vector;
+                                        console.log('瞎逛', snakeHead.vector)
+                                    }
                                 }
                             }
                         }catch(e){
-                            //console.log(e);
-                            clearInterval(inter)
+                            
+                            console.log(e);
+                            throw new Error('continue')
+                            //clearInterval(inter)
                         }
+                        
+                        setTimeout(function(){
+                            //从蛇身记录器中取出之前被踩过的block的位置
+                            let tempX=snakelist.shift();
+                            let tempY=snakelist.shift();
+                            if(die){
+                                console.log(tempX,tempY)
+                                console.log(snakeHead.hx,snakeHead.hy)
+                                _rows[snakeHead.hx][snakeHead.hy].img.setAttribute('class','head')
+                            }else{
+                                backToBlock(tempX,tempY);
+                            }
+                        },snakeHead.length.length*speed);
                         if(snakeHead.vector=="NORTH"){
                             //撞墙判断
                             if(snakeHead.hx-1<0){
@@ -241,16 +295,11 @@ export default {
                             _rows[snakeHead.hx-1][snakeHead.hy].isSnakeBody=true;
                             snakeHead.hx=snakeHead.hx-1;
                             checkBall(snakeHead.hx,snakeHead.hy);
+                            
                             //将被踩过的block的位置记录起来，snakelist蛇身中
                             snakelist.push(snakeHead.hx);
                             snakelist.push(snakeHead.hy);
                             //固定时间后（蛇身长度），蛇身变回砖块
-                            setTimeout(function(){
-                                //从蛇身记录器中取出之前被踩过的block的位置
-                                let tempX=snakelist.shift();
-                                let tempY=snakelist.shift();
-                                backToBlock(tempX,tempY);
-                            },snakeHead.length.length*speed);
                         }else if(snakeHead.vector=="WEST"){
                             if(snakeHead.hy-1<0){
                                 youDIE();
@@ -268,11 +317,11 @@ export default {
                             checkBall(snakeHead.hx,snakeHead.hy);
                             snakelist.push(snakeHead.hx);
                             snakelist.push(snakeHead.hy);
-                            setTimeout(function(){
+                           /*  setTimeout(function(){
                                 let tempX=snakelist.shift();
                                 let tempY=snakelist.shift();
                                 backToBlock(tempX,tempY);
-                            },snakeHead.length.length*speed);
+                            },snakeHead.length.length*speed); */
                             
                         }else if(snakeHead.vector=="SOUTH"){
                             if(snakeHead.hx+1>size-1){
@@ -291,11 +340,11 @@ export default {
                             checkBall(snakeHead.hx,snakeHead.hy);
                             snakelist.push(snakeHead.hx);
                             snakelist.push(snakeHead.hy);
-                            setTimeout(function(){
+                            /* setTimeout(function(){
                                 let tempX=snakelist.shift();
                                 let tempY=snakelist.shift();
                                 backToBlock(tempX,tempY);
-                            },snakeHead.length.length*speed);
+                            },snakeHead.length.length*speed); */
                         }else{
                             if(snakeHead.hy+1>size-1){
                                 youDIE();
@@ -313,11 +362,11 @@ export default {
                             checkBall(snakeHead.hx,snakeHead.hy);
                             snakelist.push(snakeHead.hx);
                             snakelist.push(snakeHead.hy);
-                            setTimeout(function(){
+                            /* setTimeout(function(){
                                 let tempX=snakelist.shift();
                                 let tempY=snakelist.shift();
                                 backToBlock(tempX,tempY);
-                            },snakeHead.length.length*speed);
+                            },snakeHead.length.length*speed); */
                         }
                         lock=false;
                     },speed);
@@ -355,6 +404,10 @@ export default {
     }
     .yellow{
         background-color: rgb(253, 255, 113);
+        
+    }
+    .head{
+        background-color: rgb(76, 160, 38);
     }
     .red{
         background-color: rgb(255, 106, 106);

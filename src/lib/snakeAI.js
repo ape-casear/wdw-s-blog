@@ -11,6 +11,13 @@
  */
 import { underscore2 } from './underscore';
 const _ = underscore2;
+
+let orientation = {
+    'Orientation_-1_0': 'NORTH',
+    'Orientation_1_0': 'SOUTH',
+    'Orientation_0_-1': 'WEST',
+    'Orientation_0_1': 'EAST',
+}
 const display = function(){
     //if(this[0]&&this[0][0]){
         this.forEach(x=>{
@@ -71,7 +78,7 @@ function ManhattanDistense(start, end){
 /* //console.log(ManhattanDistense({x:1,y:1},{x:8,y:8}))
 //console.log(ManhattanDistense({x:3,y:1},{x:8,y:8}))
 return; */
-function run(rows, start, end, tail){
+function run(rows, start, end, tail, ballPosition){
     if(!end.x && !end.y && end.y !=0 && end.x != 0){
         return true;
     }
@@ -101,12 +108,7 @@ function run(rows, start, end, tail){
         map[end_X][end_Y] = 0;
     }
     let util_arr = [[-1,0],[1,0],[0,-1],[0,1]]
-    let orientation = {
-        'Orientation_-1_0': 'NORTH',
-        'Orientation_1_0': 'SOUTH',
-        'Orientation_0_-1': 'WEST',
-        'Orientation_0_1': 'EAST',
-    }
+    
     let open = [];
     let first = new Point(init_X, init_Y, null, 0, false)
     open.push(first)
@@ -144,7 +146,11 @@ function run(rows, start, end, tail){
                 })){
                     ////console.log('出现重复的了',temp_x,temp_y)
                 }else{
-                    border.push(new Point(temp_x, temp_y, cur_point, cur_point.step + 1, false, ManhattanDistense({x: temp_x, y: temp_y}, {x: end_X, y: end_Y})))
+                    if(ballPosition){
+                        border.push(new Point(temp_x, temp_y, cur_point, cur_point.step + 1, false, ManhattanDistense({x: temp_x, y: temp_y}, {x: end_X, y: end_Y})))
+                    }else{
+                        border.push(new Point(temp_x, temp_y, cur_point, cur_point.step + 1, false, ManhattanDistense({x: temp_x, y: temp_y}, {x: end_X, y: end_Y})))
+                    }
                 }
             }
         }
@@ -162,9 +168,18 @@ function run(rows, start, end, tail){
             result = false;
             break
         }
-        let min = Math.min(...border.map(item=>item.ManDis))
+        let value;
+        if(ballPosition){
+            value = Math.max(...border.map(item=>item.ManDis))
+            if(safe == 20){
+                border.forEach(item=>console.log(item.ManDis))
+                console.log(value)
+            }
+        }else{
+            value = Math.min(...border.map(item=>item.ManDis))
+        }
         temp_dnxb = border.filter(item=>{
-            return item.ManDis == min;
+            return item.ManDis == value;
         })
         temp_dnxb = temp_dnxb.map(item=>{
             let dx1 = item.x - end_X;
@@ -174,7 +189,7 @@ function run(rows, start, end, tail){
             item.liner = Math.abs(dx1*dy2 - dx2*dy1)
             return item;
         })
-        temp_dnxb = [_.min(temp_dnxb, (item)=>{
+        temp_dnxb = [_.max(temp_dnxb, (item)=>{
             return item.liner;
         })]
         ////console.log(temp_dnxb.length)
@@ -193,6 +208,8 @@ function run(rows, start, end, tail){
             }else{
                 open.push( item )
                 record.push( item )
+                /* console.log(item)
+                console.log(cur_point) */
                 map[temp_x][temp_y] = cur_point.step + 1;
             }
         })
@@ -230,65 +247,83 @@ function run(rows, start, end, tail){
 function wonder(rows, start, direction){
     let util_arr = [[-1,0],[1,0],[0,-1],[0,1]]
 
-    wonder_map = get2DimensionArr(rows);
+    let wonder_map = get2DimensionArr(rows);
     let count = 0;
     let escape = '12';
+    let nextPoint = [];
     for(let i=0; i < util_arr.length; i++){
         let temp_x = start.x + util_arr[i][0]
         let temp_y = start.y + util_arr[i][1]
-        if(wonder_map[temp_x][temp_y] == 0){
-            count++;
-            escape = "Orientation_" + util_arr[i][0] + "_" + util_arr[i][1];
+        if(checkPoint(temp_x, temp_y, wonder_map)){
+            if(wonder_map[temp_x][temp_y] == 0){
+                count++;
+                escape = "Orientation_" + util_arr[i][0] + "_" + util_arr[i][1];
+            }
         }
+        nextPoint.push({x:temp_x,y:temp_y})
+    }
+    if(count == 4){
+        return {vector: 'NORTH', point: nextPoint[0]}
     }
     if(count == 3){
         if(direction == 'NORTH'){
-            return 'WEST'
+            return {vector: 'WEST', point: nextPoint[2]}
         }else if(direction == 'WEST'){
-            return 'SOUTH'
+            return {vector: 'SOUTH', point: nextPoint[1]}
         }else if(direction == 'SOUTH'){
-            return 'EAST'
+            return {vector: 'EAST', point: nextPoint[3]}
         }else{
-            return 'NORTH'
+            return {vector: 'NORTH', point: nextPoint[0]}
         }
     }
     if(count == 2){
         if(direction == 'NORTH'){
-            let west = wonder_map[start.x][start.y - 1]
-            let east = wonder_map[start.x][start.y + 1]
+            let west = !checkPoint(start.x, start.y-1, wonder_map) || wonder_map[start.x][start.y - 1]
+            let east = !checkPoint(start.x, start.y+1, wonder_map) || wonder_map[start.x][start.y + 1]
             if(west || east){
-                return direction;
+                return {vector: 'NORTH', point: nextPoint[0]}
             }else{
-                return 'WEST'
+                return {vector: 'WEST', point: nextPoint[2]}
             }
         }else if(direction == 'WEST'){
-            let north = wonder_map[start.x - 1][start.y]
-            let south = wonder_map[start.x + 1][start.y]
+            let north = !checkPoint(start.x-1, start.y, wonder_map) || wonder_map[start.x - 1][start.y]
+            let south = !checkPoint(start.x+1, start.y, wonder_map) || wonder_map[start.x + 1][start.y]
             if(south || north){
-                return direction;
+                return {vector: 'WEST', point: nextPoint[2]}
             }else{
-                return 'SOUTH'
+                return {vector: 'SOUTH', point: nextPoint[1]}
             }
         }else if(direction == 'SOUTH'){
-            let west = wonder_map[start.x][start.y - 1]
-            let east = wonder_map[start.x][start.y + 1]
+            let west = !checkPoint(start.x, start.y-1, wonder_map) || wonder_map[start.x][start.y - 1]
+            let east = !checkPoint(start.x, start.y+1, wonder_map) || wonder_map[start.x][start.y + 1]
             if(west || east){
-                return direction;
+                return {vector: 'SOUTH', point: nextPoint[1]}
             }else{
-                return 'EAST'
+                return {vector: 'EAST', point: nextPoint[3]}
             }
         }else{
-            let north = wonder_map[start.x - 1][start.y]
-            let south = wonder_map[start.x + 1][start.y]
+            let north = !checkPoint(start.x-1, start.y, wonder_map) || wonder_map[start.x - 1][start.y]
+            let south = !checkPoint(start.x+1, start.y, wonder_map) || wonder_map[start.x + 1][start.y]
             if(south || north){
-                return direction;
+                return {vector: 'EAST', point: nextPoint[3]}
             }else{
-                return 'NORTH'
+                return {vector: 'NORTH', point: nextPoint[0]}
             }
         }
     }
     if(count == 1){
-        return orientation[escape];
+        
+        let tem = {
+            'NORTH': {vector: 'NORTH', point: nextPoint[0]},
+            'SOUTH': {vector: 'SOUTH', point: nextPoint[1]},
+            'WEST': {vector: 'WEST', point: nextPoint[2]},
+            'EAST': {vector: 'EAST', point: nextPoint[3]},
+        }
+        return tem[orientation[escape]]
+        
+    }
+    if(count == 0){
+        return {vector: 'NORTH', point: nextPoint[0]}
     }
 }
 export const running = run;
