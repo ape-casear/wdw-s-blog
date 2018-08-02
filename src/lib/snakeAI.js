@@ -147,7 +147,7 @@ function run(rows, start, end, tail, ballPosition){
                     ////console.log('出现重复的了',temp_x,temp_y)
                 }else{
                     if(ballPosition){
-                        border.push(new Point(temp_x, temp_y, cur_point, cur_point.step + 1, false, ManhattanDistense({x: temp_x, y: temp_y}, {x: end_X, y: end_Y})))
+                        border.push(new Point(temp_x, temp_y, cur_point, cur_point.step + 1, false, ManhattanDistense({x: temp_x, y: temp_y}, ballPosition)))
                     }else{
                         border.push(new Point(temp_x, temp_y, cur_point, cur_point.step + 1, false, ManhattanDistense({x: temp_x, y: temp_y}, {x: end_X, y: end_Y})))
                     }
@@ -326,5 +326,51 @@ function wonder(rows, start, direction){
         return {vector: 'NORTH', point: nextPoint[0]}
     }
 }
+
+function maxDistanceMove(rows, start, tail, ballPosition, canSeeBall){
+    let util_arr = [[-1,0],[1,0],[0,-1],[0,1]]
+
+    let wonder_map = get2DimensionArr(rows);
+    let nextPoint = [];
+    for(let i=0; i < util_arr.length; i++){
+        let temp_x = start.x + util_arr[i][0]
+        let temp_y = start.y + util_arr[i][1]
+        if(checkPoint(temp_x, temp_y, wonder_map)){
+            if(wonder_map[temp_x][temp_y] == 0){
+                
+                nextPoint.push({
+                    point: {x: temp_x,y: temp_y}, 
+                    distance: ManhattanDistense({x: temp_x, y: temp_y}, ballPosition),
+                    escape: "Orientation_" + util_arr[i][0] + "_" + util_arr[i][1]
+                })
+            }
+        }
+    }
+    nextPoint = _.sortBy(nextPoint, item=>{
+        return item.distance;
+    })
+    for(let i = nextPoint.length - 1; i >= 0; i--){
+        
+        let access_tail = run(rows, nextPoint[i].point, tail, false);
+        rows[nextPoint[i].point.x][nextPoint[i].point.y].isSnakeBody = true;
+        let access_ball = run(rows, ballPosition, tail, false);
+        rows[nextPoint[i].point.x][nextPoint[i].point.y].isSnakeBody = false;
+        if(canSeeBall){
+            if(access_tail && access_ball){
+                return orientation[nextPoint[i].escape];
+            }else{
+                console.log( i+'没有');
+            }
+        }else{
+            if(access_tail){
+                return orientation[nextPoint[i].escape];
+            }else{
+                console.log( i+'没有');
+            } 
+        }
+    }
+
+}
 export const running = run;
 export const wondering = wonder;
+export const goBack = maxDistanceMove;

@@ -94,7 +94,7 @@ export default {
 <style>
   #content img{
     margin: 20px 0 20px 0;
-    width: 100%;
+    width: 80%;
   }
   #content h2 h3 h4 {
     margin-top:20px;

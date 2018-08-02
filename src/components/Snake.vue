@@ -10,8 +10,10 @@
         
         <input type="radio" class="level" name="level" value="200" />slow
         <input type="radio" class="level" name="level" value="150" />medium
-        <input type="radio" class="level" name="level" value="100" />fast<br/>
-        <div>score:{{snakelength.length-3}} <span style="margin-left:30px;">按w，a，d开始</span></div>
+        <input type="radio" class="level" checked name="level" value="100" />fast
+        <button  class="button" name="snakeAI"  @click="auto" >{{text}}</button>
+        <button  class="button" name="snakeAI"  :disabled="disabled" @click="startgame" >点击开始游戏</button><br/>
+        <div>score:<span style="color:red;">{{snakelength.length-3}}</span> <span style="margin-left:30px;">或者按w，a，d开始</span></div>
         <input type="button"  @click="click"  value="重新开始" v-show="youdie.youdie" />
         
     </center>
@@ -19,7 +21,7 @@
 </template>
 
 <script>
-import { running, wondering } from '../lib/snakeAI';
+import { running, wondering, goBack } from '../lib/snakeAI';
 export default {
   data (){
       return {
@@ -29,14 +31,26 @@ export default {
           youdie: {youdie: false},
           snakebody:[],
           snakelength: { length: 3},
-          rows: []
+          rows: [],
+          snakeAI: false,
+          text: 'Human模式',
+          disabled: false,
+          bottonStart: null
       }
   },
   methods: {
+      auto(){
+          this.snakeAI = !this.snakeAI;
+          this.text = !this.snakeAI? 'Human模式':'SnakeAI模式';
+      },
+      startgame(){
+          this.bottonStart({keyCode: 119});
+      },
       click(){
           if(!this.started){
               return;
           }
+          this.disabled = false;
           for(let i=0; i<this.size; i++){
             for(let j=0; j<this.size; j++){
              
@@ -56,7 +70,11 @@ export default {
           this.start();
        },
        start(){
+            let that = this;
+            //let snakeAI = this.snakeAI;
             let restBlock = [];
+            let type = 0;
+            let longStep = 0;
             this.started = true;
             let message = this.$message;
             const lastTail = {x: 0, y: 0}
@@ -145,6 +163,7 @@ export default {
                 }
                 //放球
                 function putBall(){
+                    that.disabled = true;
                     let index = Math.floor(Math.random()*restBlock.length)
                     var bx = restBlock[index].x
                     var by = restBlock[index].y
@@ -192,7 +211,10 @@ export default {
                 function checkBall(cx,cy){
                     //restBlock.push({x:snakeHead.hx, Y:snakeHead.hy})
                     restBlock.shift();
+                    console.log('type:',type)
                     if(_rows[cx][cy].isBall==true){
+                        type = (type + 1)%7;
+                        longStep = 0;
                         snakeHead.length.length++;
                         _rows[cx][cy].isBall=false;
                         putBall();
@@ -202,7 +224,7 @@ export default {
                 var snakelist= this.snakebody;
                 
                 //触发按键
-                document.onkeypress=function(e){
+                document.onkeypress = that.bottonStart = function(e){
                     //设置方向			
                     setVector(e);
                     //如果是第一次以后按键事件，就直接return，不再开启新的线程执行setInterval了，
@@ -215,26 +237,44 @@ export default {
                     if(level){speed=level.getAttribute('value');}
                     //蛇的移动
                     var inter=setInterval(function interval(){   
-                       
+                        if(that.snakeAI){
+                        let error = 0;
                         try{
                             let start = {x: snakeHead.hx, y: snakeHead.hy};
                             let end = {x: snakelist[0],y: snakelist[1]}
                             let direction;
-                            if(snakeHead.length.length > 200){
-                                direction = running(_rows, start, ballposition, false, true)
-                            }else{
-                                direction = running(_rows, start, ballposition, false)
-                            }
+                            
+                            direction = running(_rows, start, ballposition, false)
+                           
                             //console.log('一次头找球执行完毕', direction)
                             //console.log('end', end)
                             //console.log('ballposition', ballposition)
                             let access = running(_rows, ballposition, end, true);
                             if( direction && access){
-                                console.log('向球前进-------OOO', direction)
-                                snakeHead.vector = direction;
+                                //console.log('向球前进-------OOO', direction)
+                                if(snakeHead.length.length > 200 ){
+                                    snakeHead.vector = goBack(_rows, start, lastTail, ballposition, true)
+                                    longStep++;
+                                    if(!snakeHead.vector){
+                                        snakeHead.vector = direction;
+                                    }
+                                }else if(snakeHead.length.length > 120 && type == 6 && longStep < 200){
+                                    console.log('难得一次绕着走－－－－－－－－')
+                                    snakeHead.vector = goBack(_rows, start, lastTail, ballposition, true)
+                                    longStep++;
+                                    if(!snakeHead.vector){
+                                        snakeHead.vector = direction;
+                                    }
+                                }else{
+                                    console.log('我有绕着走？？？')
+                                    snakeHead.vector = direction
+                                }
                             }else{
-                                console.log(`向尾巴前进------->>>`)
-                                if(snakeHead.length.length > 100){
+                                //console.log(`向尾巴前进------->>>`)
+
+                                
+
+                                if(snakeHead.length.length > 300){
                                     let wonder = wondering(_rows, {x: snakeHead.hx, y: snakeHead.hy}, snakeHead.vector);
                                     console.log(wonder)
                                     if(running(_rows, wonder.point, lastTail, false)){
@@ -249,29 +289,43 @@ export default {
                                         }
                                     }
                                 }else{
-                                    let seeTail = running(_rows, start, lastTail, false, ballposition);
-                                    if(seeTail){
-                                        snakeHead.vector = seeTail;
+                                    let vector = goBack(_rows, {x: snakeHead.hx, y: snakeHead.hy}, lastTail, ballposition)
+                                    if(vector){
+                                        console.log(vector)
+                                        snakeHead.vector = vector;
                                     }else{
-                                        snakeHead.vector = wondering(_rows, start, snakeHead.vector).vector;
-                                        console.log('瞎逛', snakeHead.vector)
+                                        console.log('没有vector')
+                                        /* die = true
+                                        clearInterval(inter) */
+                                        let seeTail = running(_rows, start, lastTail, false, ballposition);
+                                        if(seeTail){
+                                            snakeHead.vector = seeTail;
+                                        }else{
+                                            snakeHead.vector = wondering(_rows, start, snakeHead.vector).vector;
+                                            console.log('瞎逛', snakeHead.vector)
+                                        }
                                     }
                                 }
                             }
+                            error--;
+                            error = error < 0? 0 : error;
                         }catch(e){
-                            
+                            error++;
+                            if(error > 20){
+                                clearInterval(inter)
+                            }
                             console.log(e);
                             throw new Error('continue')
-                            //clearInterval(inter)
-                        }
+                            
+                        }}
                         
                         setTimeout(function(){
                             //从蛇身记录器中取出之前被踩过的block的位置
                             let tempX=snakelist.shift();
                             let tempY=snakelist.shift();
                             if(die){
-                                console.log(tempX,tempY)
-                                console.log(snakeHead.hx,snakeHead.hy)
+                                /* console.log(tempX,tempY)
+                                console.log(snakeHead.hx,snakeHead.hy) */
                                 _rows[snakeHead.hx][snakeHead.hy].img.setAttribute('class','head')
                             }else{
                                 backToBlock(tempX,tempY);
@@ -411,5 +465,13 @@ export default {
     }
     .red{
         background-color: rgb(255, 106, 106);
+    }
+    .button{
+        height: 26px;
+        width: 86px;
+        padding: 3px 5px;
+        margin-left: 10px;
+        border-radius: 5px;
+        font-size: 6px;
     }
 </style>
