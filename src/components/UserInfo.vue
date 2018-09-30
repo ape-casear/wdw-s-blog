@@ -3,6 +3,7 @@
 </template>
 
 <script>
+import * as a from '../lib/jweixin-1.3.2';
 export default {
   
 }
